@@ -106,10 +106,12 @@ export function fromSteps(steps: string[]): Test {
         // console.log(step);
         await handleStep(page, step, consoleMessages);
         consoleMessages = [];
-        // const value = await page.evaluate(() =>
-        //   sessionStorage.getItem("freeze-cache"),
-        // );
-        // console.log(JSON.parse(value));
+        const cacheStr = await page.evaluate(() => sessionStorage.getItem("freeze-cache"));
+        if (cacheStr !== null) {
+          const cache = JSON.parse(cacheStr) as { cacheKey: string }[];
+          const unwantedCache = cache.filter((c) => c.cacheKey !== "/increment.html" && c.cacheKey !== "/dynamic.html");
+          expect(unwantedCache).toHaveLength(0);
+        }
       }
       expect(errors).toHaveLength(0);
       expect(consoleMessages).toHaveLength(0);
