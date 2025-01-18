@@ -25,19 +25,26 @@
         "all": true
       },
       "complexity": {
-        "all": true
+        "all": true,
+        "noExcessiveCognitiveComplexity": "off",
+        "useLiteralKeys": "off"
       },
       "suspicious": {
-        "all": true
+        "all": true,
+        "noConsole": "off"
       },
       "correctness": {
         "all": true
       },
       "nursery": {
-        "all": true
+        "all": true,
+        "noProcessEnv": "off"
       },
       "style": {
-        "all": true
+        "all": true,
+        "useNamingConvention": "off",
+        "noDefaultExport": "off",
+        "noNamespaceImport": "off"
       }
     }
   }

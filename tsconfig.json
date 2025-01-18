@@ -12,6 +12,7 @@
     "noEmit": true,
 
     /* Linting */
+    "skipLibCheck": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "noFallthroughCasesInSwitch": true,
