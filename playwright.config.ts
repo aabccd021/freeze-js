@@ -27,14 +27,12 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-no-bfcache",
-      testMatch: ["no-bfcache.test.ts"],
       use: { ...devices["Desktop Chrome"] },
     },
     disableTestChromiumBfCache
       ? {}
       : {
           name: "chromium-bfcache",
-          testMatch: ["bfcache.test.ts"],
           use: {
             ...devices["Desktop Chrome"],
             channel: "chromium",
@@ -48,7 +46,6 @@ export default defineConfig({
       ? {}
       : {
           name: "firefox-no-bfcache",
-          testMatch: ["no-bfcache.test.ts"],
           use: { ...devices["Desktop Firefox"] },
         },
   ],
