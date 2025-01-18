@@ -122,7 +122,7 @@ test.beforeAll(() => {
   const __dirname = new URL(".", import.meta.url).pathname;
   execSync(
     `esbuild ${__dirname}/freeze.ts --target=es6 --format=esm --bundle --outfile=${__dirname}/fixtures/freeze.js`,
-    { stdio: "inherit" },
+    { stdio: "ignore" },
   );
 });
 
