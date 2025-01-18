@@ -25,7 +25,7 @@
         settings.formatter.biome.priority = 2;
       };
 
-      typeCheck = pkgs.runCommandLocal "typeCheck" { } ''
+      tsc = pkgs.runCommandLocal "tsc" { } ''
         cp -Lr ${nodeModules} ./node_modules
         cp -Lr ${./freeze.ts} ./freeze.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
@@ -33,9 +33,20 @@
         touch $out
       '';
 
+      biome = pkgs.runCommandLocal "biome" { } ''
+        cp -Lr ${nodeModules} ./node_modules
+        cp -L ${./biome.jsonc} ./biome.jsonc
+        cp -L ${./tsconfig.json} ./tsconfig.json
+        cp -L ${./package.json} ./package.json
+        cp -Lr ${./freeze.ts} ./freeze.ts
+        ${pkgs.biome}/bin/biome check --error-on-warnings
+        touch $out
+      '';
+
       packages = {
         formatting = treefmtEval.config.build.check self;
-        typecheck = typeCheck;
+        tsc = tsc;
+        biome = biome;
         nodeModules = nodeModules;
       };
 
