@@ -73,9 +73,20 @@ async function handleStep(page: Page, step: string, consoleMessages: string[]): 
 
 type Test = [title: string, body: (args: { page: Page }) => Promise<void>];
 
+const validTests: string[] = [];
+
 export function fromSteps(steps: string[]): Test {
+  const testName = steps.join(" ");
+  for (const validTest of validTests) {
+    const shorter = testName.length < validTest.length ? testName : validTest;
+    const longer = testName.length < validTest.length ? validTest : testName;
+    if (longer.startsWith(shorter)) {
+      throw new Error(`redundant: "${shorter}" in "${longer}"`);
+    }
+  }
+  validTests.push(testName);
   return [
-    steps.join(" "),
+    testName,
     async ({ page }) => {
       const errors: Error[] = [];
       page.on("pageerror", (error) => errors.push(error));
@@ -100,21 +111,3 @@ export function fromSteps(steps: string[]): Test {
     },
   ];
 }
-
-// function checkRedundantSteps(arr1: string[], arr2: string[]): void {
-//   const smaller = arr1.length < arr2.length ? arr1 : arr2;
-//   for (let i = 0; i < smaller.length; i++) {
-//     if (arr1[i] === arr2[i]) {
-//       continue;
-//     }
-//     return;
-//   }
-//   if (arr1.length === arr2.length) {
-//     return;
-//   }
-//   const arr1Str = arr1.map((s) => `"${s}"`).join(", ");
-//   const arr2Str = arr2.map((s) => `"${s}"`).join(", ");
-//   const smallerStr = arr1.length < arr2.length ? arr1Str : arr2Str;
-//   const largerStr = arr1.length < arr2.length ? arr2Str : arr1Str;
-//   throw new Error(`redundant: [${smallerStr}] in [${largerStr}]`);
-// }
