@@ -214,11 +214,18 @@ log("freeze.ts");
 window.addEventListener("pageshow", (event) => {
 	const url = currentUrl();
 	log("pageshow", event.persisted, url.pathname);
-	const navType = performance.getEntriesByType("navigation")[0]?.type;
-	log(navType);
+	const perfEntry = performance.getEntriesByType("navigation")[0];
+	if (
+		perfEntry === undefined ||
+		!("type" in perfEntry) ||
+		typeof perfEntry.type !== "string"
+	) {
+		throw new Error(`Unknown performance entry: ${JSON.stringify(perfEntry)}`);
+	}
+	const navigationType = perfEntry.type;
 	const shouldRestore =
-		(!event.persisted && navType === "back_forward") ||
-		(event.persisted && navType === "navigate");
+		(!event.persisted && navigationType === "back_forward") ||
+		(event.persisted && navigationType === "navigate");
 	if (shouldRestore) {
 		const cached = getCachedPage(url);
 		if (cached) {
