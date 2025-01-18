@@ -1,4 +1,4 @@
-import { type Page, expect, test } from "@playwright/test";
+import { type Page, expect } from "@playwright/test";
 
 async function expectClicked(
   page: Page,
@@ -79,10 +79,12 @@ async function handleStep(
   throw new Error(`Unknown step: ${step}`);
 }
 
-export function runTest(params: string[][], attribute?: "fail"): void {
-  for (const steps of params) {
-    const tester = attribute === "fail" ? test.fail : test;
-    tester(steps.join(" "), async ({ page }) => {
+type Test = [title: string, body: (args: { page: Page }) => Promise<void>];
+
+export function fromSteps(steps: string[]): Test {
+  return [
+    steps.join(" "),
+    async ({ page }) => {
       const errors: Error[] = [];
       page.on("pageerror", (error) => errors.push(error));
 
@@ -103,6 +105,24 @@ export function runTest(params: string[][], attribute?: "fail"): void {
       expect(errors).toHaveLength(0);
       expect(consoleMessages).toHaveLength(0);
       await page.close();
-    });
-  }
+    },
+  ];
 }
+
+// function checkRedundantSteps(arr1: string[], arr2: string[]): void {
+//   const smaller = arr1.length < arr2.length ? arr1 : arr2;
+//   for (let i = 0; i < smaller.length; i++) {
+//     if (arr1[i] === arr2[i]) {
+//       continue;
+//     }
+//     return;
+//   }
+//   if (arr1.length === arr2.length) {
+//     return;
+//   }
+//   const arr1Str = arr1.map((s) => `"${s}"`).join(", ");
+//   const arr2Str = arr2.map((s) => `"${s}"`).join(", ");
+//   const smallerStr = arr1.length < arr2.length ? arr1Str : arr2Str;
+//   const largerStr = arr1.length < arr2.length ? arr2Str : arr1Str;
+//   throw new Error(`redundant: [${smallerStr}] in [${largerStr}]`);
+// }
