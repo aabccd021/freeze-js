@@ -24,6 +24,4 @@ function onInfiniteEvent(event: CustomEventInit<InfiniteEvent>): void {
 
 window.addEventListener("infinite", onInfiniteEvent);
 
-window.dispatchEvent(
-  new CustomEvent<string>("infsub", { detail: import.meta.url }),
-);
+window.dispatchEvent(new CustomEvent<string>("infsub", { detail: import.meta.url }));

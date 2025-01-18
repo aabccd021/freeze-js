@@ -156,18 +156,12 @@ async function freezeOnNavigateOrPopstate(url: RelPath): Promise<void> {
   );
 
   // trigger `window.addEventListener("freeze:page-loaded")`
-  await Promise.all(
-    Array.from(subscribedScripts.values()).map(
-      (src): Promise<unknown> => import(src),
-    ),
-  );
+  await Promise.all(Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)));
 
   window.dispatchEvent(new CustomEvent("freeze:page-loaded"));
 
   const inits = await Promise.all(
-    Array.from(subscribedScripts.values()).map(
-      (src): Promise<{ init: () => Unsub }> => import(src),
-    ),
+    Array.from(subscribedScripts.values()).map((src): Promise<{ init: () => Unsub }> => import(src)),
   );
 
   for (const init of inits) {
@@ -202,18 +196,13 @@ window.addEventListener("pageshow", (event) => {
   const url = currentUrl();
 
   const perfEntry = performance.getEntriesByType("navigation")[0];
-  if (
-    perfEntry === undefined ||
-    !("type" in perfEntry) ||
-    typeof perfEntry.type !== "string"
-  ) {
+  if (perfEntry === undefined || !("type" in perfEntry) || typeof perfEntry.type !== "string") {
     throw new Error(`Unknown performance entry: ${JSON.stringify(perfEntry)}`);
   }
 
   const navigationType = perfEntry.type;
   const shouldRestore =
-    (!event.persisted && navigationType === "back_forward") ||
-    (event.persisted && navigationType === "navigate");
+    (!event.persisted && navigationType === "back_forward") || (event.persisted && navigationType === "navigate");
   if (shouldRestore) {
     const cached = getCachedPage(url);
     if (cached) {

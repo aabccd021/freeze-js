@@ -3,10 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 // const timeout = 1_000_000;
 const timeout = 5_000;
 
-const disableTestChromiumBfCache =
-  process.env["DISABLE_TEST_CHROMIUM_BFCACHE"] === "1";
-const disableTestFirefoxNoBfCache =
-  process.env["DISABLE_TEST_FIREFOX_NOBFCACHE"] === "1";
+const disableTestChromiumBfCache = process.env["DISABLE_TEST_CHROMIUM_BFCACHE"] === "1";
+const disableTestFirefoxNoBfCache = process.env["DISABLE_TEST_FIREFOX_NOBFCACHE"] === "1";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 

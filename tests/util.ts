@@ -1,20 +1,12 @@
 import { type Page, expect } from "@playwright/test";
 
-async function expectClicked(
-  page: Page,
-  consoleMessages: string[],
-  message: string,
-): Promise<void> {
+async function expectClicked(page: Page, consoleMessages: string[], message: string): Promise<void> {
   consoleMessages.length = 0;
   await page.getByTestId("main").click();
   expect(consoleMessages).toEqual([message]);
 }
 
-async function handleStep(
-  page: Page,
-  step: string,
-  consoleMessages: string[],
-): Promise<void> {
+async function handleStep(page: Page, step: string, consoleMessages: string[]): Promise<void> {
   if (step.at(0) === "g") {
     if (step.at(1) === "s") {
       await page.goto("static.html");

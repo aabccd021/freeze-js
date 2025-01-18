@@ -115,13 +115,9 @@ async function freezeOnNavigateOrPopstate(url) {
     },
     { signal: abortController.signal },
   );
-  await Promise.all(
-    Array.from(subscribedScripts.values()).map((src) => import(src)),
-  );
+  await Promise.all(Array.from(subscribedScripts.values()).map((src) => import(src)));
   window.dispatchEvent(new CustomEvent("freeze:page-loaded"));
-  const inits = await Promise.all(
-    Array.from(subscribedScripts.values()).map((src) => import(src)),
-  );
+  const inits = await Promise.all(Array.from(subscribedScripts.values()).map((src) => import(src)));
   for (const init of inits) {
     const unsub = init.init();
     unsubscribeScripts.add(unsub);
@@ -161,9 +157,7 @@ window.addEventListener("pageshow", (event) => {
   log("pageshow", event.persisted, url.pathname);
   const navType = performance.getEntriesByType("navigation")[0]?.type;
   log(navType);
-  const shouldRestore =
-    (!event.persisted && navType === "back_forward") ||
-    (event.persisted && navType === "navigate");
+  const shouldRestore = (!event.persisted && navType === "back_forward") || (event.persisted && navType === "navigate");
   if (shouldRestore) {
     const cached = getCachedPage(url);
     if (cached) {
