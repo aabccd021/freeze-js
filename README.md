@@ -1,5 +1,7 @@
 # freeze-js
 
+- reload
+- test all combination of first two steps
 - use esbuild to polyfill `Array.from`
 - localhost:8080
 - handle typescript
