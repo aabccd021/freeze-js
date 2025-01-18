@@ -32,9 +32,10 @@
 
       tsc = pkgs.runCommandLocal "tsc" { } ''
         cp -L ${./freeze.ts} ./freeze.ts
+        cp -L ${./freeze.test.ts} ./freeze.test.ts
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${./tests} ./tests
+        cp -Lr ${./fixtures} ./fixtures
         cp -Lr ${nodeModules} ./node_modules
         ${pkgs.typescript}/bin/tsc
         touch $out
@@ -42,11 +43,12 @@
 
       biome = pkgs.runCommandLocal "biome" { } ''
         cp -L ${./biome.jsonc} ./biome.jsonc
+        cp -L ${./freeze.ts} ./freeze.ts
+        cp -L ${./freeze.test.ts} ./freeze.test.ts
         cp -L ${./package.json} ./package.json
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${./freeze.ts} ./freeze.ts
-        cp -Lr ${./tests} ./tests
+        cp -Lr ${./fixtures} ./fixtures
         cp -Lr ${nodeModules} ./node_modules
         ${pkgs.biome}/bin/biome check --error-on-warnings
         touch $out
@@ -62,11 +64,12 @@
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
         export DISABLE_TEST_CHROMIUM_BFCACHE=1
         export DISABLE_TEST_FIREFOX_NOBFCACHE=1
+        cp -L ${./freeze.ts} ./freeze.ts
+        cp -L ${./freeze.test.ts} ./freeze.test.ts
         cp -L ${./package.json} ./package.json
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${./freeze.ts} ./freeze.ts
-        cp -Lr ${./tests} ./tests
+        cp -Lr ${./fixtures} ./fixtures
         cp -Lr ${nodeModules} ./node_modules
         node_modules/playwright/cli.js test
         touch $out
@@ -78,9 +81,6 @@
         biome = biome;
         nodeModules = nodeModules;
         tests = tests;
-        envs = pkgs.runCommandLocal "envs" { } ''
-          env > $out
-        '';
       };
 
     in
