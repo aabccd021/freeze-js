@@ -7,64 +7,68 @@ async function expectClicked(page: Page, consoleMessages: string[], message: str
   expect(consoleMessages).toEqual([message]);
 }
 
+async function expectStaticPage(page: Page, consoleMessages: string[]): Promise<void> {
+  await expect(page.getByTestId("main")).toHaveText("Static");
+  await expectClicked(page, consoleMessages, "click static");
+}
+
+async function expectDynamicPage(page: Page, consoleMessages: string[]): Promise<void> {
+  await expect(page.getByTestId("main")).toHaveText("Dynamic");
+  await expectClicked(page, consoleMessages, "click dynamic");
+}
+
+async function expectIncrementPage(page: Page, consoleMessages: string[], step: string): Promise<void> {
+  await expect(page.getByTestId("main")).toHaveText(step.slice(3));
+  await expectClicked(page, consoleMessages, "click increment");
+}
+
 async function handleStep(page: Page, step: string, consoleMessages: string[]): Promise<void> {
   if (step.at(0) === "g") {
     if (step.at(1) === "s") {
       await page.goto("static.html");
-      await expect(page.getByTestId("main")).toHaveText("Static");
-      await expectClicked(page, consoleMessages, "click static");
+      await expectStaticPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "d") {
       await page.goto("dynamic.html");
-      await expect(page.getByTestId("main")).toHaveText("Dynamic");
-      await expectClicked(page, consoleMessages, "click dynamic");
+      await expectDynamicPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "i") {
       await page.goto("increment.html");
-      await expect(page.getByTestId("main")).toHaveText(step.slice(3));
-      await expectClicked(page, consoleMessages, "click increment");
+      await expectIncrementPage(page, consoleMessages, step);
       return;
     }
   }
   if (step.at(0) === "c") {
     if (step.at(1) === "s") {
       await page.getByText("Static").click();
-      await expect(page.getByTestId("main")).toHaveText("Static");
-      await expectClicked(page, consoleMessages, "click static");
+      await expectStaticPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "d") {
       await page.getByText("Dynamic").click();
-      await expect(page.getByTestId("main")).toHaveText("Dynamic");
-      await expectClicked(page, consoleMessages, "click dynamic");
+      await expectDynamicPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "i") {
       await page.getByText("Increment").click();
-      await expect(page.getByTestId("main")).toHaveText(step.slice(3));
-      await expectClicked(page, consoleMessages, "click increment");
+      await expectIncrementPage(page, consoleMessages, step);
       return;
     }
   }
   if (step.at(0) === "b") {
-    // await page.goBack();
     await page.goBack({ waitUntil: "commit" });
-
     if (step.at(1) === "s") {
-      await expect(page.getByTestId("main")).toHaveText("Static");
-      await expectClicked(page, consoleMessages, "click static");
+      await expectStaticPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "d") {
-      await expect(page.getByTestId("main")).toHaveText("Dynamic");
-      await expectClicked(page, consoleMessages, "click dynamic");
+      await expectDynamicPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "i") {
-      await expect(page.getByTestId("main")).toHaveText(step.slice(3));
-      await expectClicked(page, consoleMessages, "click increment");
+      await expectIncrementPage(page, consoleMessages, step);
       return;
     }
   }
