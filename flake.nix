@@ -102,6 +102,7 @@
           pkgs.biome
           pkgs.typescript
           pkgs.http-server
+          pkgs.esbuild
         ];
       };
 

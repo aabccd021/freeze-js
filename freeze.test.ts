@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { test } from "@playwright/test";
 import { type Page, expect } from "@playwright/test";
 
@@ -76,11 +77,9 @@ async function handleStep(page: Page, step: string, consoleMessages: string[]): 
   throw new Error(`Unknown step: ${step}`);
 }
 
-type Test = [title: string, body: (args: { page: Page }) => Promise<void>];
-
 const validTests: string[] = [];
 
-export function fromSteps(steps: string[]): Test {
+export function fromSteps(steps: string[]): [title: string, body: (args: { page: Page }) => Promise<void>] {
   const testName = steps.join(" ");
   for (const validTest of validTests) {
     const shorter = testName.length < validTest.length ? testName : validTest;
@@ -96,15 +95,13 @@ export function fromSteps(steps: string[]): Test {
       const errors: Error[] = [];
       page.on("pageerror", (error) => errors.push(error));
 
-      let consoleMessages: string[] = [];
+      const consoleMessages: string[] = [];
       page.on("console", (msg) => consoleMessages.push(msg.text()));
-
       // page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
 
       for (const step of steps) {
         // console.log(step);
         await handleStep(page, step, consoleMessages);
-        consoleMessages = [];
         // const value = await page.evaluate(() =>
         //   sessionStorage.getItem("freeze-cache"),
         // );
@@ -116,6 +113,11 @@ export function fromSteps(steps: string[]): Test {
     },
   ];
 }
+
+test.beforeAll(() => {
+  const __dirname = new URL(".", import.meta.url).pathname;
+  execSync(`esbuild ${__dirname}/freeze.ts --target=es6 --format=esm --bundle --outfile=${__dirname}/fixtures/freeze.js`);
+})
 
 test(...fromSteps(["gd", "ci_1", "cd", "ci_2"]));
 test(...fromSteps(["gd", "ci_1", "cs", "ci_2"]));
