@@ -175,20 +175,14 @@ async function freezeOnNavigateOrPopstate(url: RelPath): Promise<void> {
     unsubscribeScripts.add(unsub);
   }
 
-  window.addEventListener(
-    "pagehide",
-    (_event) => {
-      // console.log("pagehide", event.persisted, url.pathname);
-      freezePage(url);
-    },
-    {
-      signal: abortController.signal,
-    },
-  );
+  window.addEventListener("pagehide", () => freezePage(url), {
+    signal: abortController.signal,
+  });
 
   window.addEventListener(
     "popstate",
     (event) => {
+      // TODO fix this type
       if (event.state?.freeze) {
         const newUrl = currentUrl();
         const newCached = getCachedPage(newUrl);
