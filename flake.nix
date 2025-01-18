@@ -59,6 +59,7 @@
           buildInputs = [
             pkgs.nodejs
             pkgs.http-server
+            pkgs.esbuild
           ];
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
@@ -70,6 +71,7 @@
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
         cp -Lr ${./fixtures} ./fixtures
+        chmod -R 700 ./fixtures
         cp -Lr ${nodeModules} ./node_modules
         node_modules/playwright/cli.js test
         touch $out

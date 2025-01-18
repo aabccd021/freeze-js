@@ -35,7 +35,8 @@
         "noConsole": "off"
       },
       "correctness": {
-        "all": true
+        "all": true,
+        "noNodejsModules": "off"
       },
       "nursery": {
         "all": true,
