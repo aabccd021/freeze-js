@@ -73,6 +73,21 @@ async function handleStep(page: Page, step: string, consoleMessages: string[]): 
       return;
     }
   }
+  if (step.at(0) === "r") {
+    await page.reload();
+    if (step.at(1) === "s") {
+      await expectStaticPage(page, consoleMessages);
+      return;
+    }
+    if (step.at(1) === "d") {
+      await expectDynamicPage(page, consoleMessages);
+      return;
+    }
+    if (step.at(1) === "i") {
+      await expectIncrementPage(page, consoleMessages, step);
+      return;
+    }
+  }
 
   throw new Error(`Unknown step: ${step}`);
 }
@@ -170,3 +185,6 @@ test(...fromSteps(["gs", "ci_1", "gs", "ci_2", "cd", "ci_3", "gi_1"]));
 test(...fromSteps(["gs", "ci_1", "gs", "ci_2", "cs", "ci_3", "gi_1"]));
 test(...fromSteps(["gs", "ci_1", "gs", "ci_2", "gd", "ci_3", "gi_1"]));
 test(...fromSteps(["gs", "ci_1", "gs", "ci_2", "gs", "ci_3", "gi_1"]));
+test(...fromSteps(["gs", "rs"]));
+test(...fromSteps(["gi_1", "ri_1"]));
+test(...fromSteps(["gd", "rd"]));
