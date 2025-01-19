@@ -63,6 +63,8 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     }
   }
 
+  const shouldFreeze = document.body.hasAttribute("data-freeze");
+
   const anchors = document.body.querySelectorAll("a");
   for (const anchor of Array.from(anchors)) {
     anchor.addEventListener(
@@ -73,7 +75,7 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
         const cached = getCachedPage(newUrl);
         if (cached) {
           event.preventDefault();
-          if (shouldFreeze()) {
+          if (shouldFreeze) {
             freezePage(url);
           }
           restorePage(newUrl, cached);
@@ -84,7 +86,7 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     );
   }
 
-  if (shouldFreeze()) {
+  if (shouldFreeze) {
     abortController.abort();
     abortController = new AbortController();
 
@@ -138,10 +140,6 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
   if (cached !== undefined) {
     history.pushState("freeze", "", url.pathname + url.search);
   }
-}
-
-function shouldFreeze(): boolean {
-  return document.body.hasAttribute("data-freeze");
 }
 
 const subscribedScripts = new Set<string>();
