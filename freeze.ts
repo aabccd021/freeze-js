@@ -86,7 +86,7 @@ async function restorePage(cached: Page, url: RelPath): Promise<void> {
 
   await initPage(url);
 
-  history.pushState({ freeze: true }, "", url.pathname + url.search);
+  history.pushState("freeze", "", url.pathname + url.search);
 }
 
 function shouldFreeze(): boolean {
@@ -182,17 +182,17 @@ async function freezeOnNavigateOrPopstate(url: RelPath): Promise<void> {
   window.addEventListener(
     "popstate",
     (event) => {
-      // TODO fix this type
-      if (event.state?.freeze) {
-        const newUrl = currentUrl();
-        const newCached = getCachedPage(newUrl);
-        if (newCached) {
-          freezePage(url);
-          restorePage(newCached, newUrl);
-          return;
-        }
+      if (event.state !== "freeze") {
+        window.location.reload();
+        return;
       }
-      window.location.reload();
+      const newUrl = currentUrl();
+      const newCached = getCachedPage(newUrl);
+      if (newCached) {
+        freezePage(url);
+        restorePage(newCached, newUrl);
+        return;
+      }
     },
     { signal: abortController.signal },
   );
