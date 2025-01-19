@@ -1,4 +1,5 @@
 .direnv
+.gcroot
 node_modules
 result
 test-results
