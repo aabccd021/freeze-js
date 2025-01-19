@@ -23,11 +23,7 @@
         programs.shfmt.enable = true;
         settings.formatter.prettier.priority = 1;
         settings.formatter.biome.priority = 2;
-
-        settings.global.excludes = [
-          "LICENSE"
-          "*.ico"
-        ];
+        settings.global.excludes = [ "LICENSE" "*.ico" ];
       };
 
       tsc = pkgs.runCommandLocal "tsc" { } ''
@@ -85,13 +81,16 @@
         tests = tests;
       };
 
+      gcroot = packages // {
+        gcroot-all = pkgs.linkFarm "gcroot-all" packages;
+      };
     in
 
     {
 
-      checks.x86_64-linux = packages;
+      checks.x86_64-linux = gcroot;
 
-      packages.x86_64-linux = packages;
+      packages.x86_64-linux = gcroot;
 
       formatter.x86_64-linux = treefmtEval.config.build.wrapper;
 
