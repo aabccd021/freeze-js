@@ -31,26 +31,27 @@ function getCachedPage(url: RelPath): Page | null {
 
 type Unsub = (() => void) | undefined;
 
-const unsubscribeScripts = new Set<Unsub>();
+const unsubs = new Set<Unsub>();
 
-async function restorePage(url: RelPath, cached?: Page): Promise<void> {
-  if (cached !== undefined) {
-    document.body.innerHTML = cached.bodyHtml;
-    for (const [name, value] of cached.bodyAttributes) {
+async function restorePage(url: RelPath, cache?: Page): Promise<void> {
+  if (cache !== undefined) {
+    document.body.innerHTML = cache.bodyHtml;
+
+    for (const [name, value] of cache.bodyAttributes) {
       document.body.setAttribute(name, value);
     }
 
     const titleElt = document.querySelector("title");
     if (titleElt) {
-      titleElt.innerHTML = cached.title;
+      titleElt.innerHTML = cache.title;
     } else {
-      window.document.title = cached.title;
+      window.document.title = cache.title;
     }
 
-    window.setTimeout(() => window.scrollTo(0, cached.scroll), 0);
+    window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
 
     subscribedScripts.clear();
-    for (const script of cached.scripts) {
+    for (const script of cache.scripts) {
       subscribedScripts.add(script);
     }
   }
@@ -61,18 +62,18 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
   for (const anchor of Array.from(anchors)) {
     anchor.addEventListener(
       "click",
-      (event) => {
+      (e) => {
         const urlRaw = new URL(anchor.href);
-        const newUrl = { pathname: urlRaw.pathname, search: urlRaw.search };
-        const cached = getCachedPage(newUrl);
-        if (cached) {
-          event.preventDefault();
-          if (shouldFreeze) {
-            freezePage(url);
-          }
-          restorePage(newUrl, cached);
+        const nextUrl = { pathname: urlRaw.pathname, search: urlRaw.search };
+        const nextCache = getCachedPage(nextUrl);
+        if (nextCache === null) {
           return;
         }
+        e.preventDefault();
+        if (shouldFreeze) {
+          freezePage(url);
+        }
+        restorePage(nextUrl, nextCache);
       },
       { once: true },
     );
@@ -82,7 +83,7 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     abortController.abort();
     abortController = new AbortController();
 
-    if (cached === undefined) {
+    if (cache === undefined) {
       const scripts = Array.from(document.querySelectorAll("script"));
       for (const script of Array.from(scripts)) {
         const src = script.getAttribute("src");
@@ -100,20 +101,14 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
       if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
         const unsub = module.init();
         if (typeof unsub === "function") {
-          unsubscribeScripts.add(unsub);
+          unsubs.add(unsub);
         }
       }
     }
 
-    window.addEventListener(
-      "pagehide",
-      () => {
-        freezePage(url);
-      },
-      {
-        signal: abortController.signal,
-      },
-    );
+    window.addEventListener("pagehide", () => freezePage(url), {
+      signal: abortController.signal,
+    });
 
     window.addEventListener(
       "popstate",
@@ -122,19 +117,18 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
           window.location.reload();
           return;
         }
-        const newUrl = currentUrl();
-        const newCached = getCachedPage(newUrl);
-        if (newCached) {
+        const nextUrl = currentUrl();
+        const nextPageCache = getCachedPage(nextUrl);
+        if (nextPageCache !== null) {
           freezePage(url);
-          restorePage(newUrl, newCached);
-          return;
+          restorePage(nextUrl, nextPageCache);
         }
       },
       { signal: abortController.signal },
     );
   }
 
-  if (cached !== undefined) {
+  if (cache !== undefined) {
     history.pushState("freeze", "", url.pathname + url.search);
   }
 }
@@ -142,15 +136,14 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
 const subscribedScripts = new Set<string>();
 
 function freezePage(url: RelPath): void {
-  for (const unsub of Array.from(unsubscribeScripts)) {
+  for (const unsub of Array.from(unsubs)) {
     unsub?.();
   }
-  unsubscribeScripts.clear();
+  unsubs.clear();
 
   const bodyHtml = document.body.innerHTML;
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
   const title = document.title;
-
   const scripts = Array.from(subscribedScripts);
 
   const pageCache = getPageCache();
@@ -189,20 +182,26 @@ let abortController = new AbortController();
 window.addEventListener("pageshow", (event) => {
   const url = currentUrl();
 
-  const perfEntry = performance.getEntriesByType("navigation")[0];
-  if (perfEntry === undefined || !("type" in perfEntry) || typeof perfEntry.type !== "string") {
-    throw new Error(`Unknown performance entry: ${JSON.stringify(perfEntry)}`);
+  const perfNavigation = performance.getEntriesByType("navigation")[0];
+  if (perfNavigation === undefined || !("type" in perfNavigation) || typeof perfNavigation.type !== "string") {
+    throw new Error(`Unknown performance entry: ${JSON.stringify(perfNavigation)}`);
   }
 
-  const navigationType = perfEntry.type;
-  const shouldRestore =
-    (!event.persisted && navigationType === "back_forward") || (event.persisted && navigationType === "navigate");
-  if (shouldRestore) {
-    const cached = getCachedPage(url);
-    if (cached) {
-      restorePage(url, cached);
-      return;
-    }
+  const shouldRestoreWithCache =
+    (!event.persisted && perfNavigation.type === "back_forward") ||
+    (event.persisted && perfNavigation.type === "navigate");
+
+  if (!shouldRestoreWithCache) {
+    restorePage(url);
+    return;
   }
-  restorePage(url);
+
+  const cache = getCachedPage(url);
+  if (cache === null) {
+    restorePage(url);
+    return;
+  }
+
+  restorePage(url, cache);
+  return;
 });
