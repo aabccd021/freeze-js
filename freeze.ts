@@ -60,28 +60,30 @@ type Unsub = (() => void) | undefined;
 
 const unsubscribeScripts = new Set<Unsub>();
 
-async function restorePage(url: RelPath, cached: Page): Promise<void> {
-  document.body.innerHTML = cached.bodyHtml;
-  for (const [name, value] of cached.bodyAttributes) {
-    document.body.setAttribute(name, value);
-  }
+async function restorePage(url: RelPath, cached?: Page): Promise<void> {
+  if (cached !== undefined) {
+    document.body.innerHTML = cached.bodyHtml;
+    for (const [name, value] of cached.bodyAttributes) {
+      document.body.setAttribute(name, value);
+    }
 
-  const titleElt = document.querySelector("title");
-  if (titleElt) {
-    titleElt.innerHTML = cached.title;
-  } else {
-    window.document.title = cached.title;
-  }
+    const titleElt = document.querySelector("title");
+    if (titleElt) {
+      titleElt.innerHTML = cached.title;
+    } else {
+      window.document.title = cached.title;
+    }
 
-  window.setTimeout(() => window.scrollTo(0, cached.scroll), 0);
+    window.setTimeout(() => window.scrollTo(0, cached.scroll), 0);
 
-  subscribedScripts.clear();
-  for (const script of cached.scripts) {
-    subscribedScripts.add(script);
-  }
+    subscribedScripts.clear();
+    for (const script of cached.scripts) {
+      subscribedScripts.add(script);
+    }
 
-  if (url.pathname === "/") {
-    throw new Error("no");
+    if (url.pathname === "/") {
+      throw new Error("no");
+    }
   }
 
   bindAnchors(url);
@@ -89,7 +91,9 @@ async function restorePage(url: RelPath, cached: Page): Promise<void> {
     await freezeOnNavigateOrPopstate(url);
   }
 
-  history.pushState("freeze", "", url.pathname + url.search);
+  if (cached !== undefined) {
+    history.pushState("freeze", "", url.pathname + url.search);
+  }
 }
 
 function shouldFreeze(): boolean {
