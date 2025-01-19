@@ -84,7 +84,10 @@ async function restorePage(url: RelPath, cached: Page): Promise<void> {
     throw new Error("no");
   }
 
-  await initPage(url);
+  bindAnchors(url);
+  if (shouldFreeze()) {
+    await freezeOnNavigateOrPopstate(url);
+  }
 
   history.pushState("freeze", "", url.pathname + url.search);
 }
