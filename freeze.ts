@@ -2,7 +2,8 @@ type RelPath = { pathname: string; search: string };
 
 type Page = {
   cacheKey: string;
-  content: string;
+  bodyHtml: string;
+  bodyAttributes: [string, string][];
   title: string;
   scroll: number;
   scripts: string[];
@@ -60,7 +61,10 @@ type Unsub = (() => void) | undefined;
 const unsubscribeScripts = new Set<Unsub>();
 
 async function restorePage(cached: Page, url: RelPath): Promise<void> {
-  document.body.outerHTML = cached.content;
+  document.body.innerHTML = cached.bodyHtml;
+  for (const [name, value] of cached.bodyAttributes) {
+    document.body.setAttribute(name, value);
+  }
 
   const titleElt = document.querySelector("title");
   if (titleElt) {
@@ -104,7 +108,8 @@ function freezePage(url: RelPath): void {
   }
   unsubscribeScripts.clear();
 
-  const content = document.body.outerHTML;
+  const bodyHtml = document.body.innerHTML;
+  const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
   const title = document.title;
 
   const scripts = Array.from(subscribedScripts);
@@ -119,7 +124,8 @@ function freezePage(url: RelPath): void {
   }
 
   const newPage: Page = {
-    content,
+    bodyHtml,
+    bodyAttributes,
     title,
     scripts,
     cacheKey,
