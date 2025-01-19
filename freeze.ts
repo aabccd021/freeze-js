@@ -38,7 +38,6 @@ type Unsub = (() => void) | undefined;
 const unsubscribeScripts = new Set<Unsub>();
 
 async function restorePage(url: RelPath, cached?: Page): Promise<void> {
-  const scripts = Array.from(document.querySelectorAll("script"));
   if (cached !== undefined) {
     document.body.innerHTML = cached.bodyHtml;
     for (const [name, value] of cached.bodyAttributes) {
@@ -58,8 +57,6 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     for (const script of cached.scripts) {
       subscribedScripts.add(script);
     }
-
-    scripts.length = 0;
   }
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
@@ -98,10 +95,13 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     //   },
     //   { signal: abortController.signal },
     // );
-    for (const script of Array.from(scripts)) {
-      const src = script.getAttribute("src");
-      if (src !== null && script.getAttribute("type") === "module") {
-        subscribedScripts.add(src);
+    if (cached === undefined) {
+      const scripts = Array.from(document.querySelectorAll("script"));
+      for (const script of Array.from(scripts)) {
+        const src = script.getAttribute("src");
+        if (src !== null && script.getAttribute("type") === "module") {
+          subscribedScripts.add(src);
+        }
       }
     }
 
