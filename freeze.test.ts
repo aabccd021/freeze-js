@@ -11,16 +11,19 @@ async function expectClicked(page: Page, consoleMessages: string[], message: str
 async function expectStaticPage(page: Page, consoleMessages: string[]): Promise<void> {
   await expect(page.getByTestId("main")).toHaveText("Static");
   await expectClicked(page, consoleMessages, "click static");
+  await expect(page).toHaveTitle("Static");
 }
 
 async function expectDynamicPage(page: Page, consoleMessages: string[]): Promise<void> {
   await expect(page.getByTestId("main")).toHaveText("Dynamic");
   await expectClicked(page, consoleMessages, "click dynamic");
+  await expect(page).toHaveTitle("Dynamic");
 }
 
 async function expectIncrementPage(page: Page, consoleMessages: string[], step: string): Promise<void> {
   await expect(page.getByTestId("main")).toHaveText(step.slice(3));
   await expectClicked(page, consoleMessages, "click increment");
+  await expect(page).toHaveTitle("Increment");
 }
 
 async function handleStep(page: Page, step: string, consoleMessages: string[]): Promise<void> {
