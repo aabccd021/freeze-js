@@ -100,13 +100,6 @@ function shouldFreeze(): boolean {
   return document.body.hasAttribute("data-freeze");
 }
 
-async function initPage(url: RelPath): Promise<void> {
-  bindAnchors(url);
-  if (shouldFreeze()) {
-    await freezeOnNavigateOrPopstate(url);
-  }
-}
-
 const subscribedScripts = new Set<string>();
 
 function freezePage(url: RelPath): void {
@@ -223,5 +216,5 @@ window.addEventListener("pageshow", (event) => {
       return;
     }
   }
-  initPage(url);
+  restorePage(url);
 });
