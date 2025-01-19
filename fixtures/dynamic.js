@@ -13,10 +13,10 @@ export function init() {
   };
 }
 
-window.addEventListener(
-  "freeze:page-loaded",
-  () => {
-    window.dispatchEvent(new CustomEvent("freeze:subscribe", { detail: import.meta.url }));
-  },
-  { once: true },
-);
+// window.addEventListener(
+//   "freeze:page-loaded",
+//   () => {
+//     window.dispatchEvent(new CustomEvent("freeze:subscribe", { detail: import.meta.url }));
+//   },
+//   { once: true },
+// );

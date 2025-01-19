@@ -38,6 +38,7 @@ type Unsub = (() => void) | undefined;
 const unsubscribeScripts = new Set<Unsub>();
 
 async function restorePage(url: RelPath, cached?: Page): Promise<void> {
+  const scripts = Array.from(document.querySelectorAll("script"));
   if (cached !== undefined) {
     document.body.innerHTML = cached.bodyHtml;
     for (const [name, value] of cached.bodyAttributes) {
@@ -58,9 +59,7 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
       subscribedScripts.add(script);
     }
 
-    if (url.pathname === "/") {
-      throw new Error("no");
-    }
+    scripts.length = 0;
   }
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
@@ -90,33 +89,50 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     abortController.abort();
     abortController = new AbortController();
 
-    window.addEventListener(
-      "freeze:subscribe",
-      (e: CustomEventInit<string>) => {
-        if (e.detail) {
-          subscribedScripts.add(e.detail);
-        }
-      },
-      { signal: abortController.signal },
-    );
-
-    // trigger `window.addEventListener("freeze:page-loaded")`
-    await Promise.all(Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)));
-
-    window.dispatchEvent(new CustomEvent("freeze:page-loaded"));
-
-    const inits = await Promise.all(
-      Array.from(subscribedScripts.values()).map((src): Promise<{ init: () => Unsub }> => import(src)),
-    );
-
-    for (const init of inits) {
-      const unsub = init.init();
-      unsubscribeScripts.add(unsub);
+    // window.addEventListener(
+    //   "freeze:subscribe",
+    //   (e: CustomEventInit<string>) => {
+    //     if (e.detail) {
+    //       subscribedScripts.add(e.detail);
+    //     }
+    //   },
+    //   { signal: abortController.signal },
+    // );
+    for (const script of Array.from(scripts)) {
+      const src = script.getAttribute("src");
+      if (src !== null && script.getAttribute("type") === "module") {
+        subscribedScripts.add(src);
+      }
     }
 
-    window.addEventListener("pagehide", () => freezePage(url), {
-      signal: abortController.signal,
-    });
+    // await Promise.all(Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)));
+
+    // window.dispatchEvent(new CustomEvent("freeze:page-loaded"));
+
+    const modules = await Promise.all(
+      Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)),
+    );
+
+    let _idx = -1;
+    for (const module of modules) {
+      _idx++;
+      if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
+        const unsub = module.init();
+        if (typeof unsub === "function") {
+          unsubscribeScripts.add(unsub);
+        }
+      }
+    }
+
+    window.addEventListener(
+      "pagehide",
+      () => {
+        freezePage(url);
+      },
+      {
+        signal: abortController.signal,
+      },
+    );
 
     window.addEventListener(
       "popstate",
