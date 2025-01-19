@@ -64,6 +64,22 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
   }
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
+  if (shouldFreeze) {
+    abortController.abort();
+    abortController = new AbortController();
+
+    window.addEventListener(
+      "freeze:subscribe",
+      (e: CustomEventInit<string>) => {
+        if (e.detail) {
+          subscribedScripts.add(e.detail);
+        }
+      },
+      { signal: abortController.signal },
+    );
+
+    await Promise.all(Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)));
+  }
 
   const anchors = document.body.querySelectorAll("a");
   for (const anchor of Array.from(anchors)) {
@@ -87,22 +103,6 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
   }
 
   if (shouldFreeze) {
-    abortController.abort();
-    abortController = new AbortController();
-
-    window.addEventListener(
-      "freeze:subscribe",
-      (e: CustomEventInit<string>) => {
-        if (e.detail) {
-          subscribedScripts.add(e.detail);
-        }
-      },
-      { signal: abortController.signal },
-    );
-
-    // trigger `window.addEventListener("freeze:page-loaded")`
-    await Promise.all(Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)));
-
     window.dispatchEvent(new CustomEvent("freeze:page-loaded"));
 
     const inits = await Promise.all(
