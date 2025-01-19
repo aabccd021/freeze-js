@@ -47,7 +47,7 @@ function bindAnchors(currentUrl: RelPath): void {
           if (shouldFreeze()) {
             freezePage(currentUrl);
           }
-          restorePage(cached, url);
+          restorePage(url, cached);
           return;
         }
       },
@@ -60,7 +60,7 @@ type Unsub = (() => void) | undefined;
 
 const unsubscribeScripts = new Set<Unsub>();
 
-async function restorePage(cached: Page, url: RelPath): Promise<void> {
+async function restorePage(url: RelPath, cached: Page): Promise<void> {
   document.body.innerHTML = cached.bodyHtml;
   for (const [name, value] of cached.bodyAttributes) {
     document.body.setAttribute(name, value);
@@ -190,7 +190,7 @@ async function freezeOnNavigateOrPopstate(url: RelPath): Promise<void> {
       const newCached = getCachedPage(newUrl);
       if (newCached) {
         freezePage(url);
-        restorePage(newCached, newUrl);
+        restorePage(newUrl, newCached);
         return;
       }
     },
@@ -212,7 +212,7 @@ window.addEventListener("pageshow", (event) => {
   if (shouldRestore) {
     const cached = getCachedPage(url);
     if (cached) {
-      restorePage(cached, url);
+      restorePage(url, cached);
       return;
     }
   }
