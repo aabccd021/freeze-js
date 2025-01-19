@@ -33,29 +33,6 @@ function getCachedPage(url: RelPath): Page | null {
   return null;
 }
 
-function bindAnchors(currentUrl: RelPath): void {
-  const anchors = document.body.querySelectorAll("a");
-  for (const anchor of Array.from(anchors)) {
-    anchor.addEventListener(
-      "click",
-      (event) => {
-        const urlRaw = new URL(anchor.href);
-        const url = { pathname: urlRaw.pathname, search: urlRaw.search };
-        const cached = getCachedPage(url);
-        if (cached) {
-          event.preventDefault();
-          if (shouldFreeze()) {
-            freezePage(currentUrl);
-          }
-          restorePage(url, cached);
-          return;
-        }
-      },
-      { once: true },
-    );
-  }
-}
-
 type Unsub = (() => void) | undefined;
 
 const unsubscribeScripts = new Set<Unsub>();
@@ -86,7 +63,27 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     }
   }
 
-  bindAnchors(url);
+  const anchors = document.body.querySelectorAll("a");
+  for (const anchor of Array.from(anchors)) {
+    anchor.addEventListener(
+      "click",
+      (event) => {
+        const urlRaw = new URL(anchor.href);
+        const newUrl = { pathname: urlRaw.pathname, search: urlRaw.search };
+        const cached = getCachedPage(newUrl);
+        if (cached) {
+          event.preventDefault();
+          if (shouldFreeze()) {
+            freezePage(url);
+          }
+          restorePage(newUrl, cached);
+          return;
+        }
+      },
+      { once: true },
+    );
+  }
+
   if (shouldFreeze()) {
     abortController.abort();
     abortController = new AbortController();
