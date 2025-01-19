@@ -9,12 +9,8 @@ type Page = {
   scripts: string[];
 };
 
-// dereference location and make it immutable
 function currentUrl(): RelPath {
-  return {
-    pathname: location.pathname,
-    search: location.search,
-  };
+  return { pathname: location.pathname, search: location.search };
 }
 
 function getPageCache(): Page[] {
@@ -86,15 +82,6 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
     abortController.abort();
     abortController = new AbortController();
 
-    // window.addEventListener(
-    //   "freeze:subscribe",
-    //   (e: CustomEventInit<string>) => {
-    //     if (e.detail) {
-    //       subscribedScripts.add(e.detail);
-    //     }
-    //   },
-    //   { signal: abortController.signal },
-    // );
     if (cached === undefined) {
       const scripts = Array.from(document.querySelectorAll("script"));
       for (const script of Array.from(scripts)) {
@@ -105,17 +92,11 @@ async function restorePage(url: RelPath, cached?: Page): Promise<void> {
       }
     }
 
-    // await Promise.all(Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)));
-
-    // window.dispatchEvent(new CustomEvent("freeze:page-loaded"));
-
     const modules = await Promise.all(
       Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)),
     );
 
-    let _idx = -1;
     for (const module of modules) {
-      _idx++;
       if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
         const unsub = module.init();
         if (typeof unsub === "function") {

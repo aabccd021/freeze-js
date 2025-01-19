@@ -12,11 +12,3 @@ export function init() {
     h1.remove();
   };
 }
-
-// window.addEventListener(
-//   "freeze:page-loaded",
-//   () => {
-//     window.dispatchEvent(new CustomEvent("freeze:subscribe", { detail: import.meta.url }));
-//   },
-//   { once: true },
-// );
