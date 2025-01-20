@@ -47,10 +47,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
     window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
 
-    // subscribedScripts.clear();
-    // for (const script of cache.scripts) {
-    //   subscribedScripts.add(script);
-    // }
+    // TODO: wake up scripts here
   }
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
