@@ -52,6 +52,8 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
 
+  const abortController = new AbortController();
+
   const anchors = document.body.querySelectorAll("a");
   for (const anchor of Array.from(anchors)) {
     anchor.addEventListener(
@@ -65,7 +67,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         }
         e.preventDefault();
         if (shouldFreeze) {
-          freezePage(url);
+          freezePage(url, abortController);
         }
         await restorePage(nextUrl, nextCache);
       },
@@ -74,9 +76,6 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   }
 
   if (shouldFreeze) {
-    abortController.abort();
-    abortController = new AbortController();
-
     const scripts = Array.from(document.querySelectorAll("script"));
     const subscribedScripts = scripts.map((script) => {
       const src = script.getAttribute("src");
@@ -104,14 +103,14 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       }
     }
 
-    window.addEventListener("pagehide", () => freezePage(url), {
+    window.addEventListener("pagehide", () => freezePage(url, abortController), {
       signal: abortController.signal,
     });
 
     window.addEventListener(
       "popstate",
       (event) => {
-        freezePage(url);
+        freezePage(url, abortController);
         if (event.state !== "freeze") {
           window.location.reload();
           return;
@@ -132,7 +131,8 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   }
 }
 
-function freezePage(url: RelPath): void {
+function freezePage(url: RelPath, abortController: AbortController): void {
+  abortController.abort();
   for (const unsub of unsubs) {
     unsub();
   }
@@ -169,8 +169,6 @@ function freezePage(url: RelPath): void {
     }
   }
 }
-
-let abortController = new AbortController();
 
 window.addEventListener("pageshow", (event) => {
   const url = currentUrl();
