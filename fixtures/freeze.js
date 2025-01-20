@@ -99,7 +99,7 @@ var v = A((P) => {
   }
   function m(n) {
     var i;
-    for (let o of y) Promise.resolve(o());
+    for (let o of y) o();
     y.clear();
     let t = Array.from(document.body.attributes).map((o) => [o.name, o.value]),
       e = w(),

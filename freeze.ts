@@ -120,10 +120,11 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         }
         const nextUrl = currentUrl();
         const nextPageCache = getCachedPage(nextUrl);
-        if (nextPageCache !== null) {
-          freezePage(url);
-          await restorePage(nextUrl, nextPageCache);
+        if (nextPageCache === null) {
+          return;
         }
+        freezePage(url);
+        await restorePage(nextUrl, nextPageCache);
       },
       { signal: abortController.signal },
     );
@@ -136,7 +137,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
 function freezePage(url: RelPath): void {
   for (const unsub of unsubs) {
-    Promise.resolve(unsub());
+    unsub();
   }
   unsubs.clear();
 
