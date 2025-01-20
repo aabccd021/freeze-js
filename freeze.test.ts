@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { type Page, expect, test } from "@playwright/test";
 
 async function expectClicked(page: Page, consoleMessages: string[], message: string): Promise<void> {
@@ -136,6 +137,16 @@ export function fromSteps(steps: string[]): Test {
     },
   ];
 }
+
+test.beforeAll(() => {
+  const __dirname = new URL(".", import.meta.url).pathname;
+  execSync(
+    `esbuild ${__dirname}/freeze.ts --target=es6 --format=esm --bundle --minify --outfile=${__dirname}/fixtures/freeze.mjs`,
+    {
+      // stdio: "ignore",
+    },
+  );
+});
 
 test(...fromSteps(["gd", "ci_1", "cd", "ci_2"]));
 test(...fromSteps(["gd", "ci_1", "cs", "ci_2"]));
