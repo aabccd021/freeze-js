@@ -17,7 +17,7 @@ var l = (t, a, n) =>
       i = (e) => (e.done ? s(e.value) : Promise.resolve(e.value).then(c, d));
     i((n = n.apply(t, a)).next());
   });
-function y() {
+function p() {
   return { pathname: location.pathname, search: location.search };
 }
 function b() {
@@ -26,7 +26,7 @@ function b() {
     (t = sessionStorage.getItem("freeze-cache")) != null ? t : "[]",
   );
 }
-function m(t) {
+function h(t) {
   let a = b();
   for (let n of a) if (n.cacheKey === t.pathname + t.search) return n;
 }
@@ -51,9 +51,9 @@ function f(t, a) {
             let r = yield import(e.src);
             return typeof r == "object" &&
               r !== null &&
-              "init" in r &&
-              typeof r.init == "function"
-              ? yield Promise.resolve(r.init())
+              "freezePageLoad" in r &&
+              typeof r.freezePageLoad == "function"
+              ? yield Promise.resolve(r.freezePageLoad())
               : yield Promise.resolve();
           }),
         ),
@@ -67,9 +67,9 @@ function f(t, a) {
           l(this, null, function* () {
             let u = new URL(e.href),
               g = { pathname: u.pathname, search: u.search },
-              p = m(g);
-            p !== void 0 &&
-              (r.preventDefault(), n && h(t, s, o), yield f(g, p));
+              y = h(g);
+            y !== void 0 &&
+              (r.preventDefault(), n && m(t, s, o), yield f(g, y));
           }),
         { once: !0 },
       );
@@ -81,27 +81,25 @@ function f(t, a) {
         },
         { signal: s.signal },
       ),
-      window.dispatchEvent(new CustomEvent("freeze:load")),
-      window.dispatchEvent(new Event("freeze:beforeunload:request")),
-      window.addEventListener("pagehide", () => h(t, s, o), {
+      window.addEventListener("pagehide", () => m(t, s, o), {
         signal: s.signal,
       }),
       window.addEventListener(
         "popstate",
         (e) => {
-          if ((h(t, s, o), e.state !== "freeze")) {
+          if ((m(t, s, o), e.state !== "freeze")) {
             window.location.reload();
             return;
           }
-          let r = y(),
-            u = m(r);
+          let r = p(),
+            u = h(r);
           u !== void 0 && f(r, u);
         },
         { signal: s.signal },
       ));
   });
 }
-function h(t, a, n) {
+function m(t, a, n) {
   var i;
   a.abort();
   for (let e of n) e();
@@ -129,7 +127,7 @@ function h(t, a, n) {
     }
 }
 window.addEventListener("pageshow", (t) => {
-  let a = y(),
+  let a = p(),
     n = performance.getEntriesByType("navigation")[0];
   if (n === void 0 || !("type" in n) || typeof n.type != "string")
     throw new Error(`Unknown performance entry: ${JSON.stringify(n)}`);
@@ -142,6 +140,6 @@ window.addEventListener("pageshow", (t) => {
     f(a);
     return;
   }
-  let o = m(a);
+  let o = h(a);
   f(a, o);
 });

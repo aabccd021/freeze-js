@@ -1,4 +1,4 @@
-export async function init() {
+export async function freezePageLoad() {
   const h1 = document.createElement("h1");
   h1.textContent = "Dynamic";
   h1.dataset.testid = "main";

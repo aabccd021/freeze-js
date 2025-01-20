@@ -2,7 +2,7 @@ function onClick() {
   console.warn("click increment");
 }
 
-export function init() {
+export function freezePageLoad() {
   const incrementElt = document.querySelector("[data-testid=main]");
   if (incrementElt === null) {
     throw new Error("Absurd");

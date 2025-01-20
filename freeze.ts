@@ -58,8 +58,13 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     .filter((script) => script.type === "module")
     .map(async (script) => {
       const module = await import(script.src);
-      if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
-        return await Promise.resolve(module.init());
+      if (
+        typeof module === "object" &&
+        module !== null &&
+        "freezePageLoad" in module &&
+        typeof module.freezePageLoad === "function"
+      ) {
+        return await Promise.resolve(module.freezePageLoad());
       }
       return await Promise.resolve();
     });
@@ -105,10 +110,6 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     },
     { signal: abortController.signal },
   );
-
-  window.dispatchEvent(new CustomEvent("freeze:load"));
-
-  window.dispatchEvent(new Event("freeze:beforeunload:request"));
 
   window.addEventListener("pagehide", () => freezePage(url, abortController, unsubs), {
     signal: abortController.signal,
