@@ -32,7 +32,6 @@ type Unsub = () => void;
 
 async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   if (cache !== undefined) {
-    document.body = document.createElement("body");
     document.body.innerHTML = cache.bodyHtml;
 
     for (const name of document.body.getAttributeNames()) {

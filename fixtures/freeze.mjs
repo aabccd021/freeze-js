@@ -1,4 +1,4 @@
-var l = (t, a, n) =>
+var f = (t, a, n) =>
   new Promise((d, o) => {
     var s = (e) => {
         try {
@@ -17,7 +17,7 @@ var l = (t, a, n) =>
       i = (e) => (e.done ? d(e.value) : Promise.resolve(e.value).then(s, c));
     i((n = n.apply(t, a)).next());
   });
-function p() {
+function y() {
   return { pathname: location.pathname, search: location.search };
 }
 function b() {
@@ -30,11 +30,10 @@ function m(t) {
   let a = b();
   for (let n of a) if (n.cacheKey === t.pathname + t.search) return n;
 }
-function f(t, a) {
-  return l(this, null, function* () {
+function l(t, a) {
+  return f(this, null, function* () {
     if (a !== void 0) {
-      (document.body = document.createElement("body")),
-        (document.body.innerHTML = a.bodyHtml);
+      document.body.innerHTML = a.bodyHtml;
       for (let e of document.body.getAttributeNames())
         document.body.removeAttribute(e);
       for (let [e, r] of a.bodyAttributes) document.body.setAttribute(e, r);
@@ -45,7 +44,7 @@ function f(t, a) {
     let n = Array.from(document.querySelectorAll("script"))
         .filter((e) => e.type === "module")
         .map((e) =>
-          l(this, null, function* () {
+          f(this, null, function* () {
             let r = yield import(e.src);
             if (
               typeof r == "object" &&
@@ -69,12 +68,12 @@ function f(t, a) {
       e.addEventListener(
         "click",
         (r) =>
-          l(this, null, function* () {
+          f(this, null, function* () {
             let u = new URL(e.href),
               g = { pathname: u.pathname, search: u.search },
-              y = m(g);
-            y !== void 0 &&
-              (r.preventDefault(), c && h(t, s, o), yield f(g, y));
+              p = m(g);
+            p !== void 0 &&
+              (r.preventDefault(), c && h(t, s, o), yield l(g, p));
           }),
         { once: !0 },
       );
@@ -89,9 +88,9 @@ function f(t, a) {
             window.location.reload();
             return;
           }
-          let r = p(),
+          let r = y(),
             u = m(r);
-          u !== void 0 && f(r, u);
+          u !== void 0 && l(r, u);
         },
         { signal: s.signal },
       ));
@@ -125,7 +124,7 @@ function h(t, a, n) {
     }
 }
 window.addEventListener("pageshow", (t) => {
-  let a = p(),
+  let a = y(),
     n = performance.getEntriesByType("navigation")[0];
   if (n === void 0 || !("type" in n) || typeof n.type != "string")
     throw new Error(`Unknown performance entry: ${JSON.stringify(n)}`);
@@ -135,9 +134,9 @@ window.addEventListener("pageshow", (t) => {
       (t.persisted && n.type === "navigate")
     )
   ) {
-    f(a);
+    l(a);
     return;
   }
   let o = m(a);
-  f(a, o);
+  l(a, o);
 });
