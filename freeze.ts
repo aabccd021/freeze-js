@@ -113,7 +113,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
     window.addEventListener(
       "popstate",
-      async (event) => {
+      (event) => {
         freezePage(url);
         if (event.state !== "freeze") {
           window.location.reload();
@@ -124,7 +124,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         if (nextPageCache === undefined) {
           return;
         }
-        await restorePage(nextUrl, nextPageCache);
+        restorePage(nextUrl, nextPageCache);
       },
       { signal: abortController.signal },
     );
@@ -175,7 +175,7 @@ function freezePage(url: RelPath): void {
 
 let abortController = new AbortController();
 
-window.addEventListener("pageshow", async (event) => {
+window.addEventListener("pageshow", (event) => {
   const url = currentUrl();
 
   const perfNavigation = performance.getEntriesByType("navigation")[0];
@@ -188,10 +188,10 @@ window.addEventListener("pageshow", async (event) => {
     (event.persisted && perfNavigation.type === "navigate");
 
   if (!shouldRestoreFromCache) {
-    await restorePage(url);
+    restorePage(url);
     return;
   }
 
   const cache = getPageCache(url);
-  await restorePage(url, cache);
+  restorePage(url, cache);
 });
