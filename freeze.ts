@@ -114,6 +114,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     window.addEventListener(
       "popstate",
       async (event) => {
+        freezePage(url);
         if (event.state !== "freeze") {
           window.location.reload();
           return;
@@ -123,7 +124,6 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         if (nextPageCache === undefined) {
           return;
         }
-        freezePage(url);
         await restorePage(nextUrl, nextPageCache);
       },
       { signal: abortController.signal },

@@ -82,13 +82,13 @@ var v = A((P) => {
             "popstate",
             (r) =>
               l(this, null, function* () {
-                if (r.state !== "freeze") {
+                if ((m(t), r.state !== "freeze")) {
                   window.location.reload();
                   return;
                 }
                 let u = b(),
                   p = y(u);
-                p !== void 0 && (m(t), yield h(u, p));
+                p !== void 0 && (yield h(u, p));
               }),
             { signal: f.signal },
           );

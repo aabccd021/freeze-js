@@ -204,7 +204,7 @@ test(...fromSteps(["gs", "ci_1", "cd", "ci_2", "gd", "ci_3", "gi"]));
 test(...fromSteps(["gs", "ci_1", "cd", "ci_2", "gs", "ci_3", "gi"]));
 test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "bs", "ci_3", "gi"]));
 test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "cd", "ci_3", "gi"]));
-test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "cs", "ci_3", "cs", "ci_4", "bs", "bi_5", "bi_5", "bi_6", "bi_6"]));
+test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "cs", "ci_3", "cs", "ci_4", "bs", "bi_5", "bi_6", "bi_7", "bi_8"]));
 test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "cs", "ci_3", "gi"]));
 test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "gd", "ci_3", "gi"]));
 test(...fromSteps(["gs", "ci_1", "cs", "ci_2", "gs", "ci_3", "gi"]));
