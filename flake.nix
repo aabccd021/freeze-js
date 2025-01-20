@@ -69,8 +69,7 @@
           ];
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
-        export DISABLE_TEST_CHROMIUM_BFCACHE=1
-        export DISABLE_TEST_FIREFOX_NOBFCACHE=1
+        export IS_NIX_BUILD=1
         cp -L ${./freeze.ts} ./freeze.ts
         cp -L ${./freeze.test.ts} ./freeze.test.ts
         cp -L ${./package.json} ./package.json
