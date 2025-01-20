@@ -75,11 +75,7 @@
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
         cp -Lr ${nodeModules} ./node_modules
-
         cp -Lr ${./fixtures} ./fixtures
-        chmod -R 700 ./fixtures
-        cp -L ${snapshot-min-js}/fixtures/* ./fixtures
-
         node_modules/playwright/cli.js test
         touch $out
       '';
