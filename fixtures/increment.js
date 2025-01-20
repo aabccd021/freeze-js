@@ -13,8 +13,9 @@ export function init() {
 
   incrementElt.addEventListener("click", onClick);
 
-  // return async () => {
-  return () => {
+  // biome-ignore lint/suspicious/useAwait: <explanation>
+  return async () => {
+    // return () => {
     // await new Promise((resolve) => setTimeout(resolve, 10));
     incrementElt.removeEventListener("click", onClick);
   };
