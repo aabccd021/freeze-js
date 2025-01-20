@@ -1,21 +1,21 @@
-var l = (t, a, n) =>
-  new Promise((s, o) => {
-    var c = (e) => {
+var f = (t, r, n) =>
+  new Promise((s, a) => {
+    var u = (e) => {
         try {
           i(n.next(e));
-        } catch (r) {
-          o(r);
+        } catch (o) {
+          a(o);
         }
       },
       d = (e) => {
         try {
           i(n.throw(e));
-        } catch (r) {
-          o(r);
+        } catch (o) {
+          a(o);
         }
       },
-      i = (e) => (e.done ? s(e.value) : Promise.resolve(e.value).then(c, d));
-    i((n = n.apply(t, a)).next());
+      i = (e) => (e.done ? s(e.value) : Promise.resolve(e.value).then(u, d));
+    i((n = n.apply(t, r)).next());
   });
 function p() {
   return { pathname: location.pathname, search: location.search };
@@ -27,89 +27,83 @@ function b() {
   );
 }
 function h(t) {
-  let a = b();
-  for (let n of a) if (n.cacheKey === t.pathname + t.search) return n;
+  let r = b();
+  for (let n of r) if (n.cacheKey === t.pathname + t.search) return n;
 }
-function f(t, a) {
-  return l(this, null, function* () {
-    if (a !== void 0) {
+function l(t, r) {
+  return f(this, null, function* () {
+    if (r !== void 0) {
       (document.body = document.createElement("body")),
-        (document.body.innerHTML = a.bodyHtml);
+        (document.body.innerHTML = r.bodyHtml);
       for (let e of document.body.getAttributeNames())
         document.body.removeAttribute(e);
-      for (let [e, r] of a.bodyAttributes) document.body.setAttribute(e, r);
-      (document.head.innerHTML = a.headHtml),
-        window.setTimeout(() => window.scrollTo(0, a.scroll), 0),
+      for (let [e, o] of r.bodyAttributes) document.body.setAttribute(e, o);
+      (document.head.innerHTML = r.headHtml),
+        window.setTimeout(() => window.scrollTo(0, r.scroll), 0),
         history.pushState("freeze", "", t.pathname + t.search);
     }
     let n = document.body.hasAttribute("data-freeze"),
       s = new AbortController(),
-      o = new Set(),
-      c = Array.from(document.querySelectorAll("script"))
+      a = Array.from(document.querySelectorAll("script"))
         .filter((e) => e.type === "module")
         .map((e) =>
-          l(this, null, function* () {
-            let r = yield import(e.src);
-            return typeof r == "object" &&
-              r !== null &&
-              "freezePageLoad" in r &&
-              typeof r.freezePageLoad == "function"
-              ? yield Promise.resolve(r.freezePageLoad())
-              : yield Promise.resolve();
+          f(this, null, function* () {
+            let o = yield import(e.src);
+            if (
+              typeof o == "object" &&
+              o !== null &&
+              "freezePageLoad" in o &&
+              typeof o.freezePageLoad == "function"
+            ) {
+              let c = yield o.freezePageLoad();
+              if (typeof c == "function") return c;
+            }
           }),
         ),
-      d = yield Promise.all(c);
-    for (let e of d) typeof e == "function" && o.add(e);
-    let i = document.body.querySelectorAll("a");
+      d = (yield Promise.all(a)).filter((e) => e !== void 0),
+      i = document.body.querySelectorAll("a");
     for (let e of Array.from(i))
       e.addEventListener(
         "click",
-        (r) =>
-          l(this, null, function* () {
-            let u = new URL(e.href),
-              g = { pathname: u.pathname, search: u.search },
-              y = h(g);
-            y !== void 0 &&
-              (r.preventDefault(), n && m(t, s, o), yield f(g, y));
+        (o) =>
+          f(this, null, function* () {
+            let c = new URL(e.href),
+              y = { pathname: c.pathname, search: c.search },
+              g = h(y);
+            g !== void 0 &&
+              (o.preventDefault(), n && m(t, s, d), yield l(y, g));
           }),
         { once: !0 },
       );
     n &&
-      (window.addEventListener(
-        "freeze:beforeunload:response",
-        (e) => {
-          e.detail !== void 0 && o.add(e.detail);
-        },
-        { signal: s.signal },
-      ),
-      window.addEventListener("pagehide", () => m(t, s, o), {
+      (window.addEventListener("pagehide", () => m(t, s, d), {
         signal: s.signal,
       }),
       window.addEventListener(
         "popstate",
         (e) => {
-          if ((m(t, s, o), e.state !== "freeze")) {
+          if ((m(t, s, d), e.state !== "freeze")) {
             window.location.reload();
             return;
           }
-          let r = p(),
-            u = h(r);
-          u !== void 0 && f(r, u);
+          let o = p(),
+            c = h(o);
+          c !== void 0 && l(o, c);
         },
         { signal: s.signal },
       ));
   });
 }
-function m(t, a, n) {
+function m(t, r, n) {
   var i;
-  a.abort();
+  r.abort();
   for (let e of n) e();
   let s = Array.from(document.body.attributes).map((e) => [e.name, e.value]),
-    o = b(),
-    c = t.pathname + t.search;
-  for (let e = 0; e < o.length; e++)
-    if (((i = o[e]) == null ? void 0 : i.cacheKey) === c) {
-      o.splice(e, 1);
+    a = b(),
+    u = t.pathname + t.search;
+  for (let e = 0; e < a.length; e++)
+    if (((i = a[e]) == null ? void 0 : i.cacheKey) === u) {
+      a.splice(e, 1);
       break;
     }
   let d = {
@@ -117,18 +111,18 @@ function m(t, a, n) {
     headHtml: document.head.innerHTML,
     scroll: window.scrollY,
     bodyAttributes: s,
-    cacheKey: c,
+    cacheKey: u,
   };
-  for (o.push(d); o.length > 0; )
+  for (a.push(d); a.length > 0; )
     try {
-      sessionStorage.setItem("freeze-cache", JSON.stringify(o));
+      sessionStorage.setItem("freeze-cache", JSON.stringify(a));
       break;
     } catch (e) {
-      o.shift();
+      a.shift();
     }
 }
 window.addEventListener("pageshow", (t) => {
-  let a = p(),
+  let r = p(),
     n = performance.getEntriesByType("navigation")[0];
   if (n === void 0 || !("type" in n) || typeof n.type != "string")
     throw new Error(`Unknown performance entry: ${JSON.stringify(n)}`);
@@ -138,9 +132,9 @@ window.addEventListener("pageshow", (t) => {
       (t.persisted && n.type === "navigate")
     )
   ) {
-    f(a);
+    l(r);
     return;
   }
-  let o = h(a);
-  f(a, o);
+  let a = h(r);
+  l(r, a);
 });

@@ -53,11 +53,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   const shouldFreeze = document.body.hasAttribute("data-freeze");
 
   const abortController = new AbortController();
-  const unsubs = new Set<Unsub>();
 
-  const moduleImports = Array.from(document.querySelectorAll("script"))
+  const modulePromises = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script) => {
+    .map(async (script): Promise<Unsub | undefined> => {
       const module = await import(script.src);
       if (
         typeof module === "object" &&
@@ -65,17 +64,17 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         "freezePageLoad" in module &&
         typeof module.freezePageLoad === "function"
       ) {
-        return await Promise.resolve(module.freezePageLoad());
+        const unsub = await module.freezePageLoad();
+        if (typeof unsub === "function") {
+          return unsub;
+        }
       }
-      return await Promise.resolve();
+      return undefined;
     });
 
-  const moduleUnsubs = await Promise.all(moduleImports);
-  for (const moduleUnsub of moduleUnsubs) {
-    if (typeof moduleUnsub === "function") {
-      unsubs.add(moduleUnsub);
-    }
-  }
+  const modules: (Unsub | undefined)[] = await Promise.all(modulePromises);
+
+  const unsubs = modules.filter((unsub) => unsub !== undefined);
 
   const anchors = document.body.querySelectorAll("a");
   for (const anchor of Array.from(anchors)) {
@@ -102,16 +101,6 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     return;
   }
 
-  window.addEventListener(
-    "freeze:beforeunload:response",
-    (e: CustomEventInit<Unsub>) => {
-      if (e.detail !== undefined) {
-        unsubs.add(e.detail);
-      }
-    },
-    { signal: abortController.signal },
-  );
-
   window.addEventListener("pagehide", () => freezePage(url, abortController, unsubs), {
     signal: abortController.signal,
   });
@@ -135,7 +124,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   );
 }
 
-function freezePage(url: RelPath, abortController: AbortController, unsubs: Set<Unsub>): void {
+function freezePage(url: RelPath, abortController: AbortController, unsubs: Unsub[]): void {
   abortController.abort();
   for (const unsub of unsubs) {
     unsub();
