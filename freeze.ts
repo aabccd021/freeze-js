@@ -50,10 +50,6 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     history.pushState("freeze", "", url.pathname + url.search);
   }
 
-  const shouldFreeze = document.body.hasAttribute("data-freeze");
-
-  const abortController = new AbortController();
-
   const modulePromises = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
     .map(async (script): Promise<Unsub | undefined> => {
@@ -75,6 +71,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   const modules: (Unsub | undefined)[] = await Promise.all(modulePromises);
 
   const unsubs = modules.filter((unsub) => unsub !== undefined);
+
+  const abortController = new AbortController();
+
+  const shouldFreeze = document.body.hasAttribute("data-freeze");
 
   const anchors = document.body.querySelectorAll("a");
   for (const anchor of Array.from(anchors)) {
