@@ -76,56 +76,57 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     );
   }
 
-  if (shouldFreeze) {
-    const scripts = Array.from(document.querySelectorAll("script"));
-    const subscribedScripts = scripts.map((script) => {
-      const src = script.getAttribute("src");
-      if (src !== null && script.getAttribute("type") === "module") {
-        return import(src);
+  if (!shouldFreeze) {
+    return;
+  }
+  const scripts = Array.from(document.querySelectorAll("script"));
+  const subscribedScripts = scripts.map((script) => {
+    const src = script.getAttribute("src");
+    if (src !== null && script.getAttribute("type") === "module") {
+      return import(src);
+    }
+    return null;
+  });
+
+  const modules = await Promise.all(subscribedScripts);
+
+  const initPromises = modules
+    .map((module) => {
+      if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
+        return module.init();
       }
       return null;
-    });
+    })
+    .map((init) => Promise.resolve(init));
 
-    const modules = await Promise.all(subscribedScripts);
-
-    const initPromises = modules
-      .map((module) => {
-        if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
-          return module.init();
-        }
-        return null;
-      })
-      .map((init) => Promise.resolve(init));
-
-    const newUnsubs = await Promise.all(initPromises);
-    for (const newUnsub of newUnsubs) {
-      if (typeof newUnsub === "function") {
-        unsubs.add(newUnsub);
-      }
+  const newUnsubs = await Promise.all(initPromises);
+  for (const newUnsub of newUnsubs) {
+    if (typeof newUnsub === "function") {
+      unsubs.add(newUnsub);
     }
-
-    window.addEventListener("pagehide", () => freezePage(url, abortController), {
-      signal: abortController.signal,
-    });
-
-    window.addEventListener(
-      "popstate",
-      (event) => {
-        freezePage(url, abortController);
-        if (event.state !== "freeze") {
-          window.location.reload();
-          return;
-        }
-        const nextUrl = currentUrl();
-        const nextPageCache = getPageCache(nextUrl);
-        if (nextPageCache === undefined) {
-          return;
-        }
-        restorePage(nextUrl, nextPageCache);
-      },
-      { signal: abortController.signal },
-    );
   }
+
+  window.addEventListener("pagehide", () => freezePage(url, abortController), {
+    signal: abortController.signal,
+  });
+
+  window.addEventListener(
+    "popstate",
+    (event) => {
+      freezePage(url, abortController);
+      if (event.state !== "freeze") {
+        window.location.reload();
+        return;
+      }
+      const nextUrl = currentUrl();
+      const nextPageCache = getPageCache(nextUrl);
+      if (nextPageCache === undefined) {
+        return;
+      }
+      restorePage(nextUrl, nextPageCache);
+    },
+    { signal: abortController.signal },
+  );
 }
 
 function freezePage(url: RelPath, abortController: AbortController): void {

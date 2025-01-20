@@ -1,140 +1,139 @@
-var h = (e, o, t) =>
-  new Promise((r, d) => {
-    var i = (a) => {
+var m = (t, o, n) =>
+  new Promise((r, a) => {
+    var f = (i) => {
         try {
-          n(t.next(a));
+          s(n.next(i));
         } catch (u) {
-          d(u);
+          a(u);
         }
       },
-      c = (a) => {
+      d = (i) => {
         try {
-          n(t.throw(a));
+          s(n.throw(i));
         } catch (u) {
-          d(u);
+          a(u);
         }
       },
-      n = (a) => (a.done ? r(a.value) : Promise.resolve(a.value).then(i, c));
-    n((t = t.apply(e, o)).next());
+      s = (i) => (i.done ? r(i.value) : Promise.resolve(i.value).then(f, d));
+    s((n = n.apply(t, o)).next());
   });
-function b() {
+function P() {
   return { pathname: location.pathname, search: location.search };
 }
-function w() {
-  var e;
+function A() {
+  var t;
   return JSON.parse(
-    (e = sessionStorage.getItem("freeze-cache")) != null ? e : "[]",
+    (t = sessionStorage.getItem("freeze-cache")) != null ? t : "[]",
   );
 }
-function g(e) {
-  let o = w();
-  for (let t of o) if (t.cacheKey === e.pathname + e.search) return t;
+function p(t) {
+  let o = A();
+  for (let n of o) if (n.cacheKey === t.pathname + t.search) return n;
 }
-var p = new Set();
-function f(e, o) {
-  return h(this, null, function* () {
+var y = new Set();
+function h(t, o) {
+  return m(this, null, function* () {
     if (o !== void 0) {
       document.body.innerHTML = o.bodyHtml;
-      for (let i of document.body.getAttributeNames())
-        document.body.removeAttribute(i);
-      for (let [i, c] of o.bodyAttributes) document.body.setAttribute(i, c);
+      for (let e of document.body.getAttributeNames())
+        document.body.removeAttribute(e);
+      for (let [e, c] of o.bodyAttributes) document.body.setAttribute(e, c);
       (document.head.innerHTML = o.headHtml),
         window.setTimeout(() => window.scrollTo(0, o.scroll), 0),
-        history.pushState("freeze", "", e.pathname + e.search);
+        history.pushState("freeze", "", t.pathname + t.search);
     }
-    let t = document.body.hasAttribute("data-freeze"),
+    let n = document.body.hasAttribute("data-freeze"),
       r = new AbortController(),
-      d = document.body.querySelectorAll("a");
-    for (let i of Array.from(d))
-      i.addEventListener(
+      a = document.body.querySelectorAll("a");
+    for (let e of Array.from(a))
+      e.addEventListener(
         "click",
         (c) =>
-          h(this, null, function* () {
-            let n = new URL(i.href),
-              a = { pathname: n.pathname, search: n.search },
-              u = g(a);
-            u !== void 0 && (c.preventDefault(), t && m(e, r), yield f(a, u));
+          m(this, null, function* () {
+            let l = new URL(e.href),
+              b = { pathname: l.pathname, search: l.search },
+              w = p(b);
+            w !== void 0 && (c.preventDefault(), n && g(t, r), yield h(b, w));
           }),
         { once: !0 },
       );
-    if (t) {
-      let c = Array.from(document.querySelectorAll("script")).map((s) => {
-          let l = s.getAttribute("src");
-          return l !== null && s.getAttribute("type") === "module"
-            ? import(l)
-            : null;
-        }),
-        a = (yield Promise.all(c))
-          .map((s) =>
-            typeof s == "object" &&
-            s !== null &&
-            "init" in s &&
-            typeof s.init == "function"
-              ? s.init()
-              : null,
-          )
-          .map((s) => Promise.resolve(s)),
-        u = yield Promise.all(a);
-      for (let s of u) typeof s == "function" && p.add(s);
-      window.addEventListener("pagehide", () => m(e, r), { signal: r.signal }),
-        window.addEventListener(
-          "popstate",
-          (s) => {
-            if ((m(e, r), s.state !== "freeze")) {
-              window.location.reload();
-              return;
-            }
-            let l = b(),
-              y = g(l);
-            y !== void 0 && f(l, y);
-          },
-          { signal: r.signal },
-        );
-    }
+    if (!n) return;
+    let d = Array.from(document.querySelectorAll("script")).map((e) => {
+        let c = e.getAttribute("src");
+        return c !== null && e.getAttribute("type") === "module"
+          ? import(c)
+          : null;
+      }),
+      i = (yield Promise.all(d))
+        .map((e) =>
+          typeof e == "object" &&
+          e !== null &&
+          "init" in e &&
+          typeof e.init == "function"
+            ? e.init()
+            : null,
+        )
+        .map((e) => Promise.resolve(e)),
+      u = yield Promise.all(i);
+    for (let e of u) typeof e == "function" && y.add(e);
+    window.addEventListener("pagehide", () => g(t, r), { signal: r.signal }),
+      window.addEventListener(
+        "popstate",
+        (e) => {
+          if ((g(t, r), e.state !== "freeze")) {
+            window.location.reload();
+            return;
+          }
+          let c = P(),
+            l = p(c);
+          l !== void 0 && h(c, l);
+        },
+        { signal: r.signal },
+      );
   });
 }
-function m(e, o) {
-  var c;
+function g(t, o) {
+  var d;
   o.abort();
-  for (let n of p) n();
-  p.clear();
-  let t = Array.from(document.body.attributes).map((n) => [n.name, n.value]),
-    r = w(),
-    d = e.pathname + e.search;
-  for (let n = 0; n < r.length; n++)
-    if (((c = r[n]) == null ? void 0 : c.cacheKey) === d) {
-      r.splice(n, 1);
+  for (let s of y) s();
+  y.clear();
+  let n = Array.from(document.body.attributes).map((s) => [s.name, s.value]),
+    r = A(),
+    a = t.pathname + t.search;
+  for (let s = 0; s < r.length; s++)
+    if (((d = r[s]) == null ? void 0 : d.cacheKey) === a) {
+      r.splice(s, 1);
       break;
     }
-  let i = {
+  let f = {
     bodyHtml: document.body.innerHTML,
     headHtml: document.head.innerHTML,
     scroll: window.scrollY,
-    bodyAttributes: t,
-    cacheKey: d,
+    bodyAttributes: n,
+    cacheKey: a,
   };
-  for (r.push(i); r.length > 0; )
+  for (r.push(f); r.length > 0; )
     try {
       sessionStorage.setItem("freeze-cache", JSON.stringify(r));
       break;
-    } catch (n) {
+    } catch (s) {
       r.shift();
     }
 }
-window.addEventListener("pageshow", (e) => {
-  let o = b(),
-    t = performance.getEntriesByType("navigation")[0];
-  if (t === void 0 || !("type" in t) || typeof t.type != "string")
-    throw new Error(`Unknown performance entry: ${JSON.stringify(t)}`);
+window.addEventListener("pageshow", (t) => {
+  let o = P(),
+    n = performance.getEntriesByType("navigation")[0];
+  if (n === void 0 || !("type" in n) || typeof n.type != "string")
+    throw new Error(`Unknown performance entry: ${JSON.stringify(n)}`);
   if (
     !(
-      (!e.persisted && t.type === "back_forward") ||
-      (e.persisted && t.type === "navigate")
+      (!t.persisted && n.type === "back_forward") ||
+      (t.persisted && n.type === "navigate")
     )
   ) {
-    f(o);
+    h(o);
     return;
   }
-  let d = g(o);
-  f(o, d);
+  let a = p(o);
+  h(o, a);
 });
