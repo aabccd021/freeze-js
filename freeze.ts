@@ -108,16 +108,11 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     signal: abortController.signal,
   });
 
-  const originalPopstate = window.onpopstate ? window.onpopstate.bind(window) : null;
   window.addEventListener(
     "popstate",
     (event) => {
       freezePage(url, abortController, unsubs);
       if (event.state !== "freeze") {
-        if (originalPopstate !== null) {
-          originalPopstate(event);
-          return;
-        }
         window.location.reload();
         return;
       }
