@@ -29,7 +29,7 @@ function getCachedPage(url: RelPath): Page | null {
   return null;
 }
 
-type Unsub = (() => void) | undefined;
+type Unsub = () => void;
 
 const unsubs = new Set<Unsub>();
 
@@ -62,7 +62,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   for (const anchor of Array.from(anchors)) {
     anchor.addEventListener(
       "click",
-      (e) => {
+      async (e) => {
         const urlRaw = new URL(anchor.href);
         const nextUrl = { pathname: urlRaw.pathname, search: urlRaw.search };
         const nextCache = getCachedPage(nextUrl);
@@ -71,7 +71,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         }
         e.preventDefault();
         if (shouldFreeze) {
-          freezePage(url);
+          await freezePage(url);
         }
         restorePage(nextUrl, nextCache);
       },
@@ -99,20 +99,26 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
     for (const module of modules) {
       if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
-        const unsub = module.init();
+        const unsub = await Promise.resolve(module.init());
         if (typeof unsub === "function") {
           unsubs.add(unsub);
         }
       }
     }
 
-    window.addEventListener("pagehide", () => freezePage(url), {
-      signal: abortController.signal,
-    });
+    window.addEventListener(
+      "pagehide",
+      async () => {
+        await freezePage(url);
+      },
+      {
+        signal: abortController.signal,
+      },
+    );
 
     window.addEventListener(
       "popstate",
-      (event) => {
+      async (event) => {
         if (event.state !== "freeze") {
           window.location.reload();
           return;
@@ -120,7 +126,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         const nextUrl = currentUrl();
         const nextPageCache = getCachedPage(nextUrl);
         if (nextPageCache !== null) {
-          freezePage(url);
+          await freezePage(url);
           restorePage(nextUrl, nextPageCache);
         }
       },
@@ -135,9 +141,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
 const subscribedScripts = new Set<string>();
 
-function freezePage(url: RelPath): void {
-  for (const unsub of Array.from(unsubs)) {
-    unsub?.();
+async function freezePage(url: RelPath): Promise<void> {
+  // await Promise.all(Array.from(unsubs).map((unsub) => Promise.resolve(unsub())));
+  for (const unsub of unsubs) {
+    await Promise.resolve(unsub());
   }
   unsubs.clear();
 

@@ -13,7 +13,9 @@ export function init() {
 
   incrementElt.addEventListener("click", onClick);
 
+  // return async () => {
   return () => {
+    // await new Promise((resolve) => setTimeout(resolve, 10));
     incrementElt.removeEventListener("click", onClick);
   };
 }
