@@ -57,7 +57,7 @@
           --format=esm \
           --bundle \
           --minify \
-          --outfile="$out/fixtures/freeze.js"
+          --outfile="$out/fixtures/freeze.mjs"
       '';
 
       tests = pkgs.runCommandNoCCLocal "tests"

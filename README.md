@@ -1,4 +1,4 @@
-# freeze-js
+# Todo
 
 - remove global vars
 - support non module scripts

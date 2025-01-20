@@ -27,17 +27,17 @@ async function expectIncrementPage(page: Page, consoleMessages: string[], step: 
 async function handleStep(page: Page, step: string, consoleMessages: string[]): Promise<void> {
   if (step.at(0) === "g") {
     if (step.at(1) === "s") {
-      await page.goto("static.html");
+      await page.goto("static.module.html");
       await expectStaticPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "d") {
-      await page.goto("dynamic.html");
+      await page.goto("dynamic.module.html");
       await expectDynamicPage(page, consoleMessages);
       return;
     }
     if (step.at(1) === "i") {
-      await page.goto("increment.html");
+      await page.goto("increment.module.html");
       await expectIncrementPage(page, consoleMessages, "gi_1");
       return;
     }
@@ -124,7 +124,9 @@ export function fromSteps(steps: string[]): Test {
         const cacheStr = await page.evaluate(() => sessionStorage.getItem("freeze-cache"));
         if (cacheStr !== null) {
           const cache = JSON.parse(cacheStr) as { cacheKey: string }[];
-          const unwantedCache = cache.filter((c) => c.cacheKey !== "/increment.html" && c.cacheKey !== "/dynamic.html");
+          const unwantedCache = cache.filter(
+            (c) => c.cacheKey !== "/increment.module.html" && c.cacheKey !== "/dynamic.module.html",
+          );
           expect(unwantedCache).toHaveLength(0);
         }
       }
