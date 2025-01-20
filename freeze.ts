@@ -71,9 +71,9 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         }
         e.preventDefault();
         if (shouldFreeze) {
-          await freezePage(url);
+          freezePage(url);
         }
-        restorePage(nextUrl, nextCache);
+        await restorePage(nextUrl, nextCache);
       },
       { once: true },
     );
@@ -106,15 +106,9 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       }
     }
 
-    window.addEventListener(
-      "pagehide",
-      async () => {
-        await freezePage(url);
-      },
-      {
-        signal: abortController.signal,
-      },
-    );
+    window.addEventListener("pagehide", () => freezePage(url), {
+      signal: abortController.signal,
+    });
 
     window.addEventListener(
       "popstate",
@@ -126,8 +120,8 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         const nextUrl = currentUrl();
         const nextPageCache = getCachedPage(nextUrl);
         if (nextPageCache !== null) {
-          await freezePage(url);
-          restorePage(nextUrl, nextPageCache);
+          freezePage(url);
+          await restorePage(nextUrl, nextPageCache);
         }
       },
       { signal: abortController.signal },
@@ -141,10 +135,9 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
 const subscribedScripts = new Set<string>();
 
-async function freezePage(url: RelPath): Promise<void> {
-  // await Promise.all(Array.from(unsubs).map((unsub) => Promise.resolve(unsub())));
+function freezePage(url: RelPath): void {
   for (const unsub of unsubs) {
-    await Promise.resolve(unsub());
+    Promise.resolve(unsub());
   }
   unsubs.clear();
 
@@ -186,7 +179,7 @@ async function freezePage(url: RelPath): Promise<void> {
 
 let abortController = new AbortController();
 
-window.addEventListener("pageshow", (event) => {
+window.addEventListener("pageshow", async (event) => {
   const url = currentUrl();
 
   const perfNavigation = performance.getEntriesByType("navigation")[0];
@@ -199,16 +192,16 @@ window.addEventListener("pageshow", (event) => {
     (event.persisted && perfNavigation.type === "navigate");
 
   if (!shouldRestoreWithCache) {
-    restorePage(url);
+    await restorePage(url);
     return;
   }
 
   const cache = getCachedPage(url);
   if (cache === null) {
-    restorePage(url);
+    await restorePage(url);
     return;
   }
 
-  restorePage(url, cache);
+  await restorePage(url, cache);
   return;
 });
