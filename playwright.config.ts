@@ -18,6 +18,7 @@ export default defineConfig({
   webServer: {
     command: `httplz ${__dirname}/fixtures`,
     url: "http://127.0.0.1:8000",
+    reuseExistingServer: true,
     timeout: 5_000,
   },
   timeout,
