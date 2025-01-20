@@ -1,4 +1,3 @@
-import { execSync } from "node:child_process";
 import { test } from "@playwright/test";
 import { type Page, expect } from "@playwright/test";
 
@@ -136,14 +135,6 @@ export function fromSteps(steps: string[]): Test {
     },
   ];
 }
-
-test.beforeAll(() => {
-  const __dirname = new URL(".", import.meta.url).pathname;
-  execSync(
-    `esbuild ${__dirname}/freeze.ts --target=es6 --format=esm --bundle --outfile=${__dirname}/fixtures/freeze.js`,
-    { stdio: "ignore" },
-  );
-});
 
 test(...fromSteps(["gd", "ci_1", "cd", "ci_2"]));
 test(...fromSteps(["gd", "ci_1", "cs", "ci_2"]));

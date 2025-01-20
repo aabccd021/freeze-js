@@ -26,7 +26,7 @@
         settings.global.excludes = [ "LICENSE" "*.ico" ];
       };
 
-      tsc = pkgs.runCommandLocal "tsc" { } ''
+      tsc = pkgs.runCommandNoCCLocal "tsc" { } ''
         cp -L ${./freeze.ts} ./freeze.ts
         cp -L ${./freeze.test.ts} ./freeze.test.ts
         cp -L ${./playwright.config.ts} ./playwright.config.ts
@@ -37,7 +37,7 @@
         touch $out
       '';
 
-      biome = pkgs.runCommandLocal "biome" { } ''
+      biome = pkgs.runCommandNoCCLocal "biome" { } ''
         cp -L ${./biome.jsonc} ./biome.jsonc
         cp -L ${./freeze.ts} ./freeze.ts
         cp -L ${./freeze.test.ts} ./freeze.test.ts
@@ -50,25 +50,36 @@
         touch $out
       '';
 
-      tests = pkgs.runCommandLocal "tests"
+      snapshot-min-js = pkgs.runCommandNoCCLocal "snapshot-min-js" { } ''
+        mkdir -p "$out/fixtures"
+        ${pkgs.esbuild}/bin/esbuild ${./freeze.ts} \
+          --target=es6 \
+          --format=esm \
+          --bundle \
+          --minify \
+          --outfile="$out/fixtures/freeze.js"
+      '';
+
+      tests = pkgs.runCommandNoCCLocal "tests"
         {
           buildInputs = [
             pkgs.nodejs
             pkgs.http-server
-            pkgs.esbuild
           ];
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
         export DISABLE_TEST_CHROMIUM_BFCACHE=1
         export DISABLE_TEST_FIREFOX_NOBFCACHE=1
-        cp -L ${./freeze.ts} ./freeze.ts
         cp -L ${./freeze.test.ts} ./freeze.test.ts
         cp -L ${./package.json} ./package.json
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
+        cp -Lr ${nodeModules} ./node_modules
+
         cp -Lr ${./fixtures} ./fixtures
         chmod -R 700 ./fixtures
-        cp -Lr ${nodeModules} ./node_modules
+        cp -L ${snapshot-min-js}/fixtures/* ./fixtures
+
         node_modules/playwright/cli.js test
         touch $out
       '';
@@ -79,6 +90,7 @@
         biome = biome;
         nodeModules = nodeModules;
         tests = tests;
+        snapshot-min-js = snapshot-min-js;
       };
 
       gcroot = packages // {

@@ -13,6 +13,9 @@
   "organizeImports": {
     "enabled": true
   },
+  "files": {
+    "ignore": ["fixtures/freeze.js"]
+  },
   "linter": {
     "enabled": true,
     "rules": {
