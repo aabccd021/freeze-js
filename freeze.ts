@@ -12,12 +12,12 @@ function currentUrl(): RelPath {
   return { pathname: location.pathname, search: location.search };
 }
 
-function getPageCache(): Page[] {
+function getCache(): Page[] {
   return JSON.parse(sessionStorage.getItem("freeze-cache") ?? "[]") as Page[];
 }
 
-function getCachedPage(url: RelPath): Page | null {
-  const pageCache = getPageCache();
+function getPageCache(url: RelPath): Page | undefined {
+  const pageCache = getCache();
 
   for (const item of pageCache) {
     if (item.cacheKey === url.pathname + url.search) {
@@ -25,7 +25,7 @@ function getCachedPage(url: RelPath): Page | null {
     }
   }
 
-  return null;
+  return undefined;
 }
 
 type Unsub = () => void;
@@ -62,8 +62,8 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       async (e) => {
         const urlRaw = new URL(anchor.href);
         const nextUrl = { pathname: urlRaw.pathname, search: urlRaw.search };
-        const nextCache = getCachedPage(nextUrl);
-        if (nextCache === null) {
+        const nextCache = getPageCache(nextUrl);
+        if (nextCache === undefined) {
           return;
         }
         e.preventDefault();
@@ -119,8 +119,8 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
           return;
         }
         const nextUrl = currentUrl();
-        const nextPageCache = getCachedPage(nextUrl);
-        if (nextPageCache === null) {
+        const nextPageCache = getPageCache(nextUrl);
+        if (nextPageCache === undefined) {
           return;
         }
         freezePage(url);
@@ -143,7 +143,7 @@ function freezePage(url: RelPath): void {
 
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
 
-  const pageCache = getPageCache();
+  const pageCache = getCache();
   const cacheKey = url.pathname + url.search;
   for (let i = 0; i < pageCache.length; i++) {
     if (pageCache[i]?.cacheKey === cacheKey) {
@@ -183,21 +183,15 @@ window.addEventListener("pageshow", async (event) => {
     throw new Error(`Unknown performance entry: ${JSON.stringify(perfNavigation)}`);
   }
 
-  const shouldRestoreWithCache =
+  const shouldRestoreFromCache =
     (!event.persisted && perfNavigation.type === "back_forward") ||
     (event.persisted && perfNavigation.type === "navigate");
 
-  if (!shouldRestoreWithCache) {
+  if (!shouldRestoreFromCache) {
     await restorePage(url);
     return;
   }
 
-  const cache = getCachedPage(url);
-  if (cache === null) {
-    await restorePage(url);
-    return;
-  }
-
+  const cache = getPageCache(url);
   await restorePage(url, cache);
-  return;
 });

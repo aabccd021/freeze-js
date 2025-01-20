@@ -1,6 +1,6 @@
-var A = (n, t) => () => (t || n((t = { exports: {} }).exports, t), t.exports);
-var d = (n, t, e) =>
-  new Promise((l, a) => {
+var A = (t, n) => () => (n || t((n = { exports: {} }).exports, n), n.exports);
+var l = (t, n, e) =>
+  new Promise((d, a) => {
     var i = (s) => {
         try {
           c(e.next(s));
@@ -15,51 +15,50 @@ var d = (n, t, e) =>
           a(r);
         }
       },
-      c = (s) => (s.done ? l(s.value) : Promise.resolve(s.value).then(i, o));
-    c((e = e.apply(n, t)).next());
+      c = (s) => (s.done ? d(s.value) : Promise.resolve(s.value).then(i, o));
+    c((e = e.apply(t, n)).next());
   });
 var v = A((P) => {
   function b() {
     return { pathname: location.pathname, search: location.search };
   }
   function w() {
-    var n;
+    var t;
     return JSON.parse(
-      (n = sessionStorage.getItem("freeze-cache")) != null ? n : "[]",
+      (t = sessionStorage.getItem("freeze-cache")) != null ? t : "[]",
     );
   }
-  function g(n) {
-    let t = w();
-    for (let e of t) if (e.cacheKey === n.pathname + n.search) return e;
-    return null;
+  function y(t) {
+    let n = w();
+    for (let e of n) if (e.cacheKey === t.pathname + t.search) return e;
   }
-  var y = new Set();
-  function f(n, t) {
-    return d(this, null, function* () {
-      if (t !== void 0) {
-        document.body.innerHTML = t.bodyHtml;
+  var g = new Set();
+  function h(t, n) {
+    return l(this, null, function* () {
+      if (n !== void 0) {
+        document.body.innerHTML = n.bodyHtml;
         for (let a of document.body.getAttributeNames())
           document.body.removeAttribute(a);
-        for (let [a, i] of t.bodyAttributes) document.body.setAttribute(a, i);
-        (document.head.innerHTML = t.headHtml),
-          window.setTimeout(() => window.scrollTo(0, t.scroll), 0);
+        for (let [a, i] of n.bodyAttributes) document.body.setAttribute(a, i);
+        (document.head.innerHTML = n.headHtml),
+          window.setTimeout(() => window.scrollTo(0, n.scroll), 0);
       }
       let e = document.body.hasAttribute("data-freeze"),
-        l = document.body.querySelectorAll("a");
-      for (let a of Array.from(l))
+        d = document.body.querySelectorAll("a");
+      for (let a of Array.from(d))
         a.addEventListener(
           "click",
           (i) =>
-            d(this, null, function* () {
+            l(this, null, function* () {
               let o = new URL(a.href),
                 c = { pathname: o.pathname, search: o.search },
-                s = g(c);
-              s !== null && (i.preventDefault(), e && m(n), yield f(c, s));
+                s = y(c);
+              s !== void 0 && (i.preventDefault(), e && m(t), yield h(c, s));
             }),
           { once: !0 },
         );
       if (e) {
-        h.abort(), (h = new AbortController());
+        f.abort(), (f = new AbortController());
         let i = Array.from(document.querySelectorAll("script")).map((r) => {
             let u = r.getAttribute("src");
             return u !== null && r.getAttribute("type") === "module"
@@ -77,35 +76,35 @@ var v = A((P) => {
             )
             .map((r) => Promise.resolve(r)),
           s = yield Promise.all(c);
-        for (let r of s) typeof r == "function" && y.add(r);
-        window.addEventListener("pagehide", () => m(n), { signal: h.signal }),
+        for (let r of s) typeof r == "function" && g.add(r);
+        window.addEventListener("pagehide", () => m(t), { signal: f.signal }),
           window.addEventListener(
             "popstate",
             (r) =>
-              d(this, null, function* () {
+              l(this, null, function* () {
                 if (r.state !== "freeze") {
                   window.location.reload();
                   return;
                 }
                 let u = b(),
-                  p = g(u);
-                p !== null && (m(n), yield f(u, p));
+                  p = y(u);
+                p !== void 0 && (m(t), yield h(u, p));
               }),
-            { signal: h.signal },
+            { signal: f.signal },
           );
       }
-      t !== void 0 && history.pushState("freeze", "", n.pathname + n.search);
+      n !== void 0 && history.pushState("freeze", "", t.pathname + t.search);
     });
   }
-  function m(n) {
+  function m(t) {
     var i;
-    for (let o of y) o();
-    y.clear();
-    let t = Array.from(document.body.attributes).map((o) => [o.name, o.value]),
+    for (let o of g) o();
+    g.clear();
+    let n = Array.from(document.body.attributes).map((o) => [o.name, o.value]),
       e = w(),
-      l = n.pathname + n.search;
+      d = t.pathname + t.search;
     for (let o = 0; o < e.length; o++)
-      if (((i = e[o]) == null ? void 0 : i.cacheKey) === l) {
+      if (((i = e[o]) == null ? void 0 : i.cacheKey) === d) {
         e.splice(o, 1);
         break;
       }
@@ -113,8 +112,8 @@ var v = A((P) => {
       bodyHtml: document.body.innerHTML,
       headHtml: document.head.innerHTML,
       scroll: window.scrollY,
-      bodyAttributes: t,
-      cacheKey: l,
+      bodyAttributes: n,
+      cacheKey: d,
     };
     for (e.push(a); e.length > 0; )
       try {
@@ -124,28 +123,24 @@ var v = A((P) => {
         e.shift();
       }
   }
-  var h = new AbortController();
-  window.addEventListener("pageshow", (n) =>
-    d(P, null, function* () {
-      let t = b(),
+  var f = new AbortController();
+  window.addEventListener("pageshow", (t) =>
+    l(P, null, function* () {
+      let n = b(),
         e = performance.getEntriesByType("navigation")[0];
       if (e === void 0 || !("type" in e) || typeof e.type != "string")
         throw new Error(`Unknown performance entry: ${JSON.stringify(e)}`);
       if (
         !(
-          (!n.persisted && e.type === "back_forward") ||
-          (n.persisted && e.type === "navigate")
+          (!t.persisted && e.type === "back_forward") ||
+          (t.persisted && e.type === "navigate")
         )
       ) {
-        yield f(t);
+        yield h(n);
         return;
       }
-      let a = g(t);
-      if (a === null) {
-        yield f(t);
-        return;
-      }
-      yield f(t, a);
+      let a = y(n);
+      yield h(n, a);
     }),
   );
 });
