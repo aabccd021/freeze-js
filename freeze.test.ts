@@ -1,5 +1,4 @@
-import { test } from "@playwright/test";
-import { type Page, expect } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 
 async function expectClicked(page: Page, consoleMessages: string[], message: string): Promise<void> {
   consoleMessages.length = 0;
