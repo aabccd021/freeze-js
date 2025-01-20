@@ -33,7 +33,8 @@ function h(t) {
 function f(t, a) {
   return l(this, null, function* () {
     if (a !== void 0) {
-      document.body.innerHTML = a.bodyHtml;
+      (document.body = document.createElement("body")),
+        (document.body.innerHTML = a.bodyHtml);
       for (let e of document.body.getAttributeNames())
         document.body.removeAttribute(e);
       for (let [e, r] of a.bodyAttributes) document.body.setAttribute(e, r);
