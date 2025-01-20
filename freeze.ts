@@ -97,12 +97,19 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)),
     );
 
-    for (const module of modules) {
-      if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
-        const unsub = await Promise.resolve(module.init());
-        if (typeof unsub === "function") {
-          unsubs.add(unsub);
+    const initPromises = modules
+      .map((module) => {
+        if (typeof module === "object" && module !== null && "init" in module && typeof module.init === "function") {
+          return module.init();
         }
+        return null;
+      })
+      .map((init) => Promise.resolve(init));
+
+    const initUnsubs = await Promise.all(initPromises);
+    for (const unsub of initUnsubs) {
+      if (typeof unsub === "function") {
+        unsubs.add(unsub);
       }
     }
 

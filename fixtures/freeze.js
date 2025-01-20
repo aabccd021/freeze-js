@@ -1,156 +1,159 @@
-var P = (n, t) => () => (t || n((t = { exports: {} }).exports, t), t.exports);
-var u = (n, t, r) =>
-  new Promise((l, s) => {
-    var e = (c) => {
+var P = (n, e) => () => (e || n((e = { exports: {} }).exports, e), e.exports);
+var u = (n, e, o) =>
+  new Promise((l, a) => {
+    var i = (s) => {
         try {
-          i(r.next(c));
-        } catch (a) {
-          s(a);
+          t(o.next(s));
+        } catch (r) {
+          a(r);
         }
       },
-      o = (c) => {
+      c = (s) => {
         try {
-          i(r.throw(c));
-        } catch (a) {
-          s(a);
+          t(o.throw(s));
+        } catch (r) {
+          a(r);
         }
       },
-      i = (c) => (c.done ? l(c.value) : Promise.resolve(c.value).then(e, o));
-    i((r = r.apply(n, t)).next());
+      t = (s) => (s.done ? l(s.value) : Promise.resolve(s.value).then(i, c));
+    t((o = o.apply(n, e)).next());
   });
-var A = P((b) => {
-  function p() {
+var A = P((w) => {
+  function m() {
     return { pathname: location.pathname, search: location.search };
   }
-  function w() {
+  function b() {
     var n;
     return JSON.parse(
       (n = sessionStorage.getItem("freeze-cache")) != null ? n : "[]",
     );
   }
-  function g(n) {
-    let t = w();
-    for (let r of t) if (r.cacheKey === n.pathname + n.search) return r;
+  function y(n) {
+    let e = b();
+    for (let o of e) if (o.cacheKey === n.pathname + n.search) return o;
     return null;
   }
-  var m = new Set();
-  function f(n, t) {
+  var g = new Set();
+  function d(n, e) {
     return u(this, null, function* () {
-      if (t !== void 0) {
-        document.body.innerHTML = t.bodyHtml;
-        for (let [e, o] of t.bodyAttributes) document.body.setAttribute(e, o);
-        let s = document.querySelector("title");
-        s ? (s.innerHTML = t.title) : (window.document.title = t.title),
-          window.setTimeout(() => window.scrollTo(0, t.scroll), 0),
-          d.clear();
-        for (let e of t.scripts) d.add(e);
+      if (e !== void 0) {
+        document.body.innerHTML = e.bodyHtml;
+        for (let [i, c] of e.bodyAttributes) document.body.setAttribute(i, c);
+        let a = document.querySelector("title");
+        a ? (a.innerHTML = e.title) : (window.document.title = e.title),
+          window.setTimeout(() => window.scrollTo(0, e.scroll), 0),
+          f.clear();
+        for (let i of e.scripts) f.add(i);
       }
-      let r = document.body.hasAttribute("data-freeze"),
+      let o = document.body.hasAttribute("data-freeze"),
         l = document.body.querySelectorAll("a");
-      for (let s of Array.from(l))
-        s.addEventListener(
+      for (let a of Array.from(l))
+        a.addEventListener(
           "click",
-          (e) =>
+          (i) =>
             u(this, null, function* () {
-              let o = new URL(s.href),
-                i = { pathname: o.pathname, search: o.search },
-                c = g(i);
-              c !== null && (e.preventDefault(), r && y(n), yield f(i, c));
+              let c = new URL(a.href),
+                t = { pathname: c.pathname, search: c.search },
+                s = y(t);
+              s !== null && (i.preventDefault(), o && h(n), yield d(t, s));
             }),
           { once: !0 },
         );
-      if (r) {
-        if ((h.abort(), (h = new AbortController()), t === void 0)) {
-          let e = Array.from(document.querySelectorAll("script"));
-          for (let o of Array.from(e)) {
-            let i = o.getAttribute("src");
-            i !== null && o.getAttribute("type") === "module" && d.add(i);
+      if (o) {
+        if ((p.abort(), (p = new AbortController()), e === void 0)) {
+          let t = Array.from(document.querySelectorAll("script"));
+          for (let s of Array.from(t)) {
+            let r = s.getAttribute("src");
+            r !== null && s.getAttribute("type") === "module" && f.add(r);
           }
         }
-        let s = yield Promise.all(Array.from(d.values()).map((e) => import(e)));
-        for (let e of s)
-          if (
-            typeof e == "object" &&
-            e !== null &&
-            "init" in e &&
-            typeof e.init == "function"
-          ) {
-            let o = yield Promise.resolve(e.init());
-            typeof o == "function" && m.add(o);
-          }
-        window.addEventListener("pagehide", () => y(n), { signal: h.signal }),
+        let i = (yield Promise.all(
+            Array.from(f.values()).map((t) => import(t)),
+          ))
+            .map((t) =>
+              typeof t == "object" &&
+              t !== null &&
+              "init" in t &&
+              typeof t.init == "function"
+                ? t.init()
+                : null,
+            )
+            .map((t) => Promise.resolve(t)),
+          c = yield Promise.all(i);
+        for (let t of c) typeof t == "function" && g.add(t);
+        window.addEventListener("pagehide", () => h(n), { signal: p.signal }),
           window.addEventListener(
             "popstate",
-            (e) =>
+            (t) =>
               u(this, null, function* () {
-                if (e.state !== "freeze") {
+                if (t.state !== "freeze") {
                   window.location.reload();
                   return;
                 }
-                let o = p(),
-                  i = g(o);
-                i !== null && (y(n), yield f(o, i));
+                let s = m(),
+                  r = y(s);
+                r !== null && (h(n), yield d(s, r));
               }),
-            { signal: h.signal },
+            { signal: p.signal },
           );
       }
-      t !== void 0 && history.pushState("freeze", "", n.pathname + n.search);
+      e !== void 0 && history.pushState("freeze", "", n.pathname + n.search);
     });
   }
-  var d = new Set();
-  function y(n) {
-    var c;
-    for (let a of m) Promise.resolve(a());
-    m.clear();
-    let t = document.body.innerHTML,
-      r = Array.from(document.body.attributes).map((a) => [a.name, a.value]),
+  var f = new Set();
+  function h(n) {
+    var s;
+    for (let r of g) Promise.resolve(r());
+    g.clear();
+    let e = document.body.innerHTML,
+      o = Array.from(document.body.attributes).map((r) => [r.name, r.value]),
       l = document.title,
-      s = Array.from(d),
-      e = w(),
-      o = n.pathname + n.search;
-    for (let a = 0; a < e.length; a++)
-      if (((c = e[a]) == null ? void 0 : c.cacheKey) === o) {
-        e.splice(a, 1);
+      a = Array.from(f),
+      i = b(),
+      c = n.pathname + n.search;
+    for (let r = 0; r < i.length; r++)
+      if (((s = i[r]) == null ? void 0 : s.cacheKey) === c) {
+        i.splice(r, 1);
         break;
       }
-    let i = {
-      bodyHtml: t,
-      bodyAttributes: r,
+    let t = {
+      bodyHtml: e,
+      bodyAttributes: o,
       title: l,
-      scripts: s,
-      cacheKey: o,
+      scripts: a,
+      cacheKey: c,
       scroll: window.scrollY,
     };
-    for (e.push(i); e.length > 0; )
+    for (i.push(t); i.length > 0; )
       try {
-        sessionStorage.setItem("freeze-cache", JSON.stringify(e));
+        sessionStorage.setItem("freeze-cache", JSON.stringify(i));
         break;
-      } catch (a) {
-        e.shift();
+      } catch (r) {
+        i.shift();
       }
   }
-  var h = new AbortController();
+  var p = new AbortController();
   window.addEventListener("pageshow", (n) =>
-    u(b, null, function* () {
-      let t = p(),
-        r = performance.getEntriesByType("navigation")[0];
-      if (r === void 0 || !("type" in r) || typeof r.type != "string")
-        throw new Error(`Unknown performance entry: ${JSON.stringify(r)}`);
+    u(w, null, function* () {
+      let e = m(),
+        o = performance.getEntriesByType("navigation")[0];
+      if (o === void 0 || !("type" in o) || typeof o.type != "string")
+        throw new Error(`Unknown performance entry: ${JSON.stringify(o)}`);
       if (
         !(
-          (!n.persisted && r.type === "back_forward") ||
-          (n.persisted && r.type === "navigate")
+          (!n.persisted && o.type === "back_forward") ||
+          (n.persisted && o.type === "navigate")
         )
       ) {
-        yield f(t);
+        yield d(e);
         return;
       }
-      let s = g(t);
-      if (s === null) {
-        yield f(t);
+      let a = y(e);
+      if (a === null) {
+        yield d(e);
         return;
       }
-      yield f(t, s);
+      yield d(e, a);
     }),
   );
 });
