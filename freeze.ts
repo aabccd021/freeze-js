@@ -2,11 +2,10 @@ type RelPath = { pathname: string; search: string };
 
 type Page = {
   cacheKey: string;
+  headHtml: string;
   bodyHtml: string;
   bodyAttributes: [string, string][];
-  title: string;
   scroll: number;
-  scripts: string[];
 };
 
 function currentUrl(): RelPath {
@@ -37,23 +36,21 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   if (cache !== undefined) {
     document.body.innerHTML = cache.bodyHtml;
 
+    for (const name of document.body.getAttributeNames()) {
+      document.body.removeAttribute(name);
+    }
     for (const [name, value] of cache.bodyAttributes) {
       document.body.setAttribute(name, value);
     }
 
-    const titleElt = document.querySelector("title");
-    if (titleElt) {
-      titleElt.innerHTML = cache.title;
-    } else {
-      window.document.title = cache.title;
-    }
+    document.head.innerHTML = cache.headHtml;
 
     window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
 
-    subscribedScripts.clear();
-    for (const script of cache.scripts) {
-      subscribedScripts.add(script);
-    }
+    // subscribedScripts.clear();
+    // for (const script of cache.scripts) {
+    //   subscribedScripts.add(script);
+    // }
   }
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
@@ -83,19 +80,16 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     abortController.abort();
     abortController = new AbortController();
 
-    if (cache === undefined) {
-      const scripts = Array.from(document.querySelectorAll("script"));
-      for (const script of Array.from(scripts)) {
-        const src = script.getAttribute("src");
-        if (src !== null && script.getAttribute("type") === "module") {
-          subscribedScripts.add(src);
-        }
+    const scripts = Array.from(document.querySelectorAll("script"));
+    const subscribedScripts = scripts.map((script) => {
+      const src = script.getAttribute("src");
+      if (src !== null && script.getAttribute("type") === "module") {
+        return import(src);
       }
-    }
+      return null;
+    });
 
-    const modules = await Promise.all(
-      Array.from(subscribedScripts.values()).map((src): Promise<unknown> => import(src)),
-    );
+    const modules = await Promise.all(subscribedScripts);
 
     const initPromises = modules
       .map((module) => {
@@ -140,18 +134,13 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   }
 }
 
-const subscribedScripts = new Set<string>();
-
 function freezePage(url: RelPath): void {
   for (const unsub of unsubs) {
     Promise.resolve(unsub());
   }
   unsubs.clear();
 
-  const bodyHtml = document.body.innerHTML;
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
-  const title = document.title;
-  const scripts = Array.from(subscribedScripts);
 
   const pageCache = getPageCache();
   const cacheKey = url.pathname + url.search;
@@ -163,12 +152,11 @@ function freezePage(url: RelPath): void {
   }
 
   const newPage: Page = {
-    bodyHtml,
-    bodyAttributes,
-    title,
-    scripts,
-    cacheKey,
+    bodyHtml: document.body.innerHTML,
+    headHtml: document.head.innerHTML,
     scroll: window.scrollY,
+    bodyAttributes,
+    cacheKey,
   };
 
   pageCache.push(newPage);
