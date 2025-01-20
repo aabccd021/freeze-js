@@ -48,6 +48,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
 
     // TODO: wake up scripts here
+    history.pushState("freeze", "", url.pathname + url.search);
   }
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
@@ -124,10 +125,6 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       },
       { signal: abortController.signal },
     );
-  }
-
-  if (cache !== undefined) {
-    history.pushState("freeze", "", url.pathname + url.search);
   }
 }
 

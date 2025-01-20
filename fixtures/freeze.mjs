@@ -1,5 +1,5 @@
-var h = (e, r, t) =>
-  new Promise((o, d) => {
+var h = (e, o, t) =>
+  new Promise((r, d) => {
     var i = (a) => {
         try {
           n(t.next(a));
@@ -14,8 +14,8 @@ var h = (e, r, t) =>
           d(u);
         }
       },
-      n = (a) => (a.done ? o(a.value) : Promise.resolve(a.value).then(i, c));
-    n((t = t.apply(e, r)).next());
+      n = (a) => (a.done ? r(a.value) : Promise.resolve(a.value).then(i, c));
+    n((t = t.apply(e, o)).next());
   });
 function b() {
   return { pathname: location.pathname, search: location.search };
@@ -27,22 +27,23 @@ function w() {
   );
 }
 function g(e) {
-  let r = w();
-  for (let t of r) if (t.cacheKey === e.pathname + e.search) return t;
+  let o = w();
+  for (let t of o) if (t.cacheKey === e.pathname + e.search) return t;
 }
 var p = new Set();
-function f(e, r) {
+function f(e, o) {
   return h(this, null, function* () {
-    if (r !== void 0) {
-      document.body.innerHTML = r.bodyHtml;
+    if (o !== void 0) {
+      document.body.innerHTML = o.bodyHtml;
       for (let i of document.body.getAttributeNames())
         document.body.removeAttribute(i);
-      for (let [i, c] of r.bodyAttributes) document.body.setAttribute(i, c);
-      (document.head.innerHTML = r.headHtml),
-        window.setTimeout(() => window.scrollTo(0, r.scroll), 0);
+      for (let [i, c] of o.bodyAttributes) document.body.setAttribute(i, c);
+      (document.head.innerHTML = o.headHtml),
+        window.setTimeout(() => window.scrollTo(0, o.scroll), 0),
+        history.pushState("freeze", "", e.pathname + e.search);
     }
     let t = document.body.hasAttribute("data-freeze"),
-      o = new AbortController(),
+      r = new AbortController(),
       d = document.body.querySelectorAll("a");
     for (let i of Array.from(d))
       i.addEventListener(
@@ -52,7 +53,7 @@ function f(e, r) {
             let n = new URL(i.href),
               a = { pathname: n.pathname, search: n.search },
               u = g(a);
-            u !== void 0 && (c.preventDefault(), t && m(e, o), yield f(a, u));
+            u !== void 0 && (c.preventDefault(), t && m(e, r), yield f(a, u));
           }),
         { once: !0 },
       );
@@ -75,11 +76,11 @@ function f(e, r) {
           .map((s) => Promise.resolve(s)),
         u = yield Promise.all(a);
       for (let s of u) typeof s == "function" && p.add(s);
-      window.addEventListener("pagehide", () => m(e, o), { signal: o.signal }),
+      window.addEventListener("pagehide", () => m(e, r), { signal: r.signal }),
         window.addEventListener(
           "popstate",
           (s) => {
-            if ((m(e, o), s.state !== "freeze")) {
+            if ((m(e, r), s.state !== "freeze")) {
               window.location.reload();
               return;
             }
@@ -87,23 +88,22 @@ function f(e, r) {
               y = g(l);
             y !== void 0 && f(l, y);
           },
-          { signal: o.signal },
+          { signal: r.signal },
         );
     }
-    r !== void 0 && history.pushState("freeze", "", e.pathname + e.search);
   });
 }
-function m(e, r) {
+function m(e, o) {
   var c;
-  r.abort();
+  o.abort();
   for (let n of p) n();
   p.clear();
   let t = Array.from(document.body.attributes).map((n) => [n.name, n.value]),
-    o = w(),
+    r = w(),
     d = e.pathname + e.search;
-  for (let n = 0; n < o.length; n++)
-    if (((c = o[n]) == null ? void 0 : c.cacheKey) === d) {
-      o.splice(n, 1);
+  for (let n = 0; n < r.length; n++)
+    if (((c = r[n]) == null ? void 0 : c.cacheKey) === d) {
+      r.splice(n, 1);
       break;
     }
   let i = {
@@ -113,16 +113,16 @@ function m(e, r) {
     bodyAttributes: t,
     cacheKey: d,
   };
-  for (o.push(i); o.length > 0; )
+  for (r.push(i); r.length > 0; )
     try {
-      sessionStorage.setItem("freeze-cache", JSON.stringify(o));
+      sessionStorage.setItem("freeze-cache", JSON.stringify(r));
       break;
     } catch (n) {
-      o.shift();
+      r.shift();
     }
 }
 window.addEventListener("pageshow", (e) => {
-  let r = b(),
+  let o = b(),
     t = performance.getEntriesByType("navigation")[0];
   if (t === void 0 || !("type" in t) || typeof t.type != "string")
     throw new Error(`Unknown performance entry: ${JSON.stringify(t)}`);
@@ -132,9 +132,9 @@ window.addEventListener("pageshow", (e) => {
       (e.persisted && t.type === "navigate")
     )
   ) {
-    f(r);
+    f(o);
     return;
   }
-  let d = g(r);
-  f(r, d);
+  let d = g(o);
+  f(o, d);
 });
