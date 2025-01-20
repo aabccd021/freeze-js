@@ -64,7 +64,7 @@
         {
           buildInputs = [
             pkgs.nodejs
-            pkgs.http-server
+            pkgs.httplz
           ];
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
@@ -114,7 +114,7 @@
           pkgs.nodejs
           pkgs.biome
           pkgs.typescript
-          pkgs.http-server
+          pkgs.httplz
           pkgs.esbuild
         ];
       };
