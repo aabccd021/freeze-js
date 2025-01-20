@@ -106,10 +106,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       })
       .map((init) => Promise.resolve(init));
 
-    const initUnsubs = await Promise.all(initPromises);
-    for (const unsub of initUnsubs) {
-      if (typeof unsub === "function") {
-        unsubs.add(unsub);
+    const newUnsubs = await Promise.all(initPromises);
+    for (const newUnsub of newUnsubs) {
+      if (typeof newUnsub === "function") {
+        unsubs.add(newUnsub);
       }
     }
 

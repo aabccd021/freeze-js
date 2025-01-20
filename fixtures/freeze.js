@@ -18,18 +18,18 @@ var u = (n, e, o) =>
       t = (s) => (s.done ? l(s.value) : Promise.resolve(s.value).then(i, c));
     t((o = o.apply(n, e)).next());
   });
-var A = P((w) => {
+var A = P((b) => {
   function m() {
     return { pathname: location.pathname, search: location.search };
   }
-  function b() {
+  function w() {
     var n;
     return JSON.parse(
       (n = sessionStorage.getItem("freeze-cache")) != null ? n : "[]",
     );
   }
   function y(n) {
-    let e = b();
+    let e = w();
     for (let o of e) if (o.cacheKey === n.pathname + n.search) return o;
     return null;
   }
@@ -109,7 +109,7 @@ var A = P((w) => {
       o = Array.from(document.body.attributes).map((r) => [r.name, r.value]),
       l = document.title,
       a = Array.from(f),
-      i = b(),
+      i = w(),
       c = n.pathname + n.search;
     for (let r = 0; r < i.length; r++)
       if (((s = i[r]) == null ? void 0 : s.cacheKey) === c) {
@@ -134,7 +134,7 @@ var A = P((w) => {
   }
   var p = new AbortController();
   window.addEventListener("pageshow", (n) =>
-    u(w, null, function* () {
+    u(b, null, function* () {
       let e = m(),
         o = performance.getEntriesByType("navigation")[0];
       if (o === void 0 || !("type" in o) || typeof o.type != "string")
