@@ -49,9 +49,9 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     history.pushState("freeze", "", url.pathname + url.search);
   }
 
-  const modulePromises = Array.from(document.querySelectorAll("script"))
+  const pageLoads = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script): Promise<Unsub | undefined> => {
+    .map(async (script) => {
       const module = await import(script.src);
       if (
         typeof module === "object" &&
@@ -59,17 +59,21 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         "freezePageLoad" in module &&
         typeof module.freezePageLoad === "function"
       ) {
-        const unsub = await module.freezePageLoad();
-        if (typeof unsub === "function") {
-          return unsub;
-        }
+        return await module.freezePageLoad();
       }
       return undefined;
     });
 
-  const modules: (Unsub | undefined)[] = await Promise.all(modulePromises);
+  const pageLoadResults = await Promise.allSettled(pageLoads);
 
-  const unsubs = modules.filter((unsub) => unsub !== undefined);
+  const unsubs = pageLoadResults
+    .map((unsub) => {
+      if (unsub.status === "fulfilled" && typeof unsub.value === "function") {
+        return unsub.value;
+      }
+      return undefined;
+    })
+    .filter((unsub) => unsub !== undefined);
 
   const abortController = new AbortController();
 
