@@ -139,13 +139,10 @@ export function fromSteps(steps: string[]): Test {
 }
 
 test.beforeAll(() => {
-  if (process.env["IS_NIX_BUILD"] === "1") {
+  if (process.env["IS_NIX_BUILD"] !== "1") {
     const __dirname = new URL(".", import.meta.url).pathname;
     execSync(
       `esbuild ${__dirname}/freeze.ts --target=es6 --format=esm --bundle --minify --outfile=${__dirname}/fixtures/freeze.mjs`,
-      {
-        stdio: "ignore",
-      },
     );
   }
 });
