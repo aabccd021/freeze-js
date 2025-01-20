@@ -33,6 +33,7 @@ type Unsub = () => void;
 const unsubs = new Set<Unsub>();
 
 async function restorePage(url: RelPath, cache?: Page): Promise<void> {
+  // TODO: move this block to its own function
   if (cache !== undefined) {
     document.body.innerHTML = cache.bodyHtml;
 
