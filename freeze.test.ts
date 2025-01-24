@@ -1,19 +1,20 @@
 import { type Page, expect, test } from "@playwright/test";
 
 async function expectClicked(page: Page, consoleMessages: string[], message: string): Promise<void> {
-  consoleMessages.length = 0;
+  expect(consoleMessages).toHaveLength(0);
   await page.getByTestId("main").click();
   expect(consoleMessages).toEqual([message]);
+  consoleMessages.length = 0;
 }
 
 async function expectStaticPage(page: Page, consoleMessages: string[]): Promise<void> {
-  await expect(page.getByTestId("main")).toHaveText("Static");
+  await expect(page.getByTestId("main")).toHaveText("H1St");
   await expectClicked(page, consoleMessages, "click static");
   await expect(page).toHaveTitle("Static");
 }
 
 async function expectDynamicPage(page: Page, consoleMessages: string[]): Promise<void> {
-  await expect(page.getByTestId("main")).toHaveText("Dynamic");
+  await expect(page.getByTestId("main")).toHaveText("H1Dy");
   await expectClicked(page, consoleMessages, "click dynamic");
   await expect(page).toHaveTitle("Dynamic");
 }
@@ -113,14 +114,13 @@ export function fromSteps(steps: string[]): Test {
       const errors: Error[] = [];
       page.on("pageerror", (error) => errors.push(error));
 
-      let consoleMessages: string[] = [];
+      const consoleMessages: string[] = [];
       page.on("console", (msg) => consoleMessages.push(msg.text()));
 
       // page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
 
       for (const step of steps) {
         await handleStep(page, step, consoleMessages);
-        consoleMessages = [];
         const cacheStr = await page.evaluate(() => sessionStorage.getItem("freeze-cache"));
         if (cacheStr !== null) {
           const cache = JSON.parse(cacheStr) as { cacheKey: string }[];
@@ -165,7 +165,7 @@ test(...fromSteps(["gi", "cd", "cs"]));
 test(...fromSteps(["gi", "cd", "gd"]));
 test(...fromSteps(["gi", "cd", "gs"]));
 test(...fromSteps(["gi", "cs", "bi_2"]));
-test(...fromSteps(["gi", "cs", "cd"]));
+test.only(...fromSteps(["gi", "cs", "cd"]));
 test(...fromSteps(["gi", "cs", "ci_2", "bs", "bi_3"]));
 test(...fromSteps(["gi", "cs", "ci_2", "bs", "ci_3", "bs", "bi_4"]));
 test(...fromSteps(["gi", "cs", "ci_2", "cs", "bi_3"]));

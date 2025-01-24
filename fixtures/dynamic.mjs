@@ -1,6 +1,6 @@
 export async function freezePageLoad() {
   const h1 = document.createElement("h1");
-  h1.textContent = "Dynamic";
+  h1.textContent = "H1Dy";
   h1.dataset.testid = "main";
   document.body.appendChild(h1);
 
