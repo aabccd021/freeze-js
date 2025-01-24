@@ -3,4 +3,4 @@
 - support non module scripts
 - support inline scripts
 - support dynamically rendered anchor
-- test freezePageLoad throws error
+- test freezePageLoad/unsub throws error
