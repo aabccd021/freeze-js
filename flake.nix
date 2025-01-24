@@ -117,7 +117,6 @@
           pkgs.nodejs
           pkgs.biome
           pkgs.typescript
-          pkgs.httplz
           pkgs.esbuild
           serve
         ];
