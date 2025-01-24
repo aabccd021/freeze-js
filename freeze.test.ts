@@ -62,6 +62,10 @@ async function handleStep(page: Page, step: string, consoleMessages: string[]): 
   }
   if (step.at(0) === "b") {
     await page.goBack({ waitUntil: "commit" });
+
+    // bfcache recovers console messages so we need to clear them
+    consoleMessages.length = 0;
+
     if (step.at(1) === "s") {
       await expectStaticPage(page, consoleMessages);
       return;
@@ -165,7 +169,7 @@ test(...fromSteps(["gi", "cd", "cs"]));
 test(...fromSteps(["gi", "cd", "gd"]));
 test(...fromSteps(["gi", "cd", "gs"]));
 test(...fromSteps(["gi", "cs", "bi_2"]));
-test.only(...fromSteps(["gi", "cs", "cd"]));
+test(...fromSteps(["gi", "cs", "cd"]));
 test(...fromSteps(["gi", "cs", "ci_2", "bs", "bi_3"]));
 test(...fromSteps(["gi", "cs", "ci_2", "bs", "ci_3", "bs", "bi_4"]));
 test(...fromSteps(["gi", "cs", "ci_2", "cs", "bi_3"]));
