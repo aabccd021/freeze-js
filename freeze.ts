@@ -74,6 +74,12 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     })
     .filter((unsub) => unsub !== undefined);
 
+  for (const pageLoadResult of pageLoadResults) {
+    if (pageLoadResult.status === "rejected") {
+      console.error(pageLoadResult.reason);
+    }
+  }
+
   const abortController = new AbortController();
 
   const shouldFreeze = document.body.hasAttribute("data-freeze");
