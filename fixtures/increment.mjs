@@ -2,7 +2,23 @@ function onClick() {
   console.warn("click increment");
 }
 
-export function freezePageLoad() {
+/**
+ * @typedef {Function} Unsub
+ * @returns {void}
+ */
+
+/**
+ * @typedef {Object} VilInitEvent
+ * @property {Element} element
+ * @property {string} listId
+ */
+
+/**
+ * @typedef {Function} InitChild
+ * @param {VilInitEvent} _event
+ * @returns {Promise<Unsub | undefined> | Unsub | undefined}
+ */
+export function freezePageLoad(_event) {
   const incrementElt = document.querySelector("[data-testid=main]");
   if (incrementElt === null) {
     throw new Error("Absurd");
