@@ -50,7 +50,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const pageLoads = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script) => {
+    .map(async (script): Promise<Unsub | undefined> => {
       const module = await import(script.src);
       if (
         typeof module === "object" &&
