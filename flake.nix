@@ -23,7 +23,7 @@
         programs.shfmt.enable = true;
         settings.formatter.prettier.priority = 1;
         settings.formatter.biome.priority = 2;
-        settings.global.excludes = [ "LICENSE" "*.ico" "fixtures/freeze.mjs" ];
+        settings.global.excludes = [ "LICENSE" "*.ico" "fixtures/freeze.js" ];
       };
 
       tsc = pkgs.runCommandNoCCLocal "tsc" { } ''
@@ -50,22 +50,28 @@
         touch $out
       '';
 
-      snapshot-min-js = pkgs.runCommandNoCCLocal "snapshot-min-js" { } ''
-        mkdir -p "$out/fixtures"
-        ${pkgs.esbuild}/bin/esbuild ${./freeze.ts} \
-          --target=es6 \
-          --format=esm \
-          --bundle \
-          --minify \
-          --outfile="$out/fixtures/freeze.mjs"
-      '';
+      serve = pkgs.writeShellApplication {
+        name = "serve";
+        text = ''
+          root="$(pwd)"
+          if command -v git &> /dev/null; then
+            root=$(git rev-parse --show-toplevel)
+          fi
+          ${pkgs.esbuild}/bin/esbuild  "$root/freeze.ts" \
+            --bundle \
+            --target=es6 \
+            --format=esm \
+            --outdir="$root/fixtures" \
+            --servedir="$root/fixtures" \
+            --watch
+        '';
+      };
 
       tests = pkgs.runCommandNoCCLocal "tests"
         {
           buildInputs = [
             pkgs.nodejs
-            pkgs.httplz
-            pkgs.esbuild
+            serve
           ];
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
@@ -88,7 +94,6 @@
         biome = biome;
         nodeModules = nodeModules;
         tests = tests;
-        snapshot-min-js = snapshot-min-js;
       };
 
       gcroot = packages // {
@@ -114,8 +119,10 @@
           pkgs.typescript
           pkgs.httplz
           pkgs.esbuild
+          serve
         ];
       };
+
 
     };
 }
