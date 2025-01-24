@@ -58,7 +58,9 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         "freezePageLoad" in module &&
         typeof module.freezePageLoad === "function"
       ) {
-        return await module.freezePageLoad();
+        return await module.freezePageLoad({
+          fromCache: cache !== undefined,
+        });
       }
       return undefined;
     });
