@@ -6,6 +6,7 @@ type Page = {
   bodyHtml: string;
   bodyAttributes: [string, string][];
   scroll: number;
+  extra: Record<string, unknown>;
 };
 
 function currentUrl(): RelPath {
@@ -50,7 +51,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const pageLoads = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script): Promise<Unsub | undefined> => {
+    .map(async (script): Promise<[string, Unsub] | undefined> => {
       const module = await import(script.src);
       if (
         typeof module === "object" &&
@@ -58,9 +59,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         "freezePageLoad" in module &&
         typeof module.freezePageLoad === "function"
       ) {
-        return await module.freezePageLoad({
+        const pageLoadPromise = await module.freezePageLoad({
           fromCache: cache !== undefined,
         });
+        return [script.src, pageLoadPromise];
       }
       return undefined;
     });
@@ -69,7 +71,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const unsubs = pageLoadResults
     .map((unsub) => {
-      if (unsub.status === "fulfilled" && typeof unsub.value === "function") {
+      if (unsub.status === "fulfilled") {
         return unsub.value;
       }
       return undefined;
@@ -134,10 +136,11 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   );
 }
 
-function freezePage(url: RelPath, abortController: AbortController, unsubs: Unsub[]): void {
+function freezePage(url: RelPath, abortController: AbortController, unsubs: [string, Unsub][]): void {
   abortController.abort();
-  for (const unsub of unsubs) {
-    unsub();
+  const extra: Record<string, unknown> = {};
+  for (const [src, unsub] of unsubs) {
+    extra[src] = unsub();
   }
 
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
@@ -157,6 +160,7 @@ function freezePage(url: RelPath, abortController: AbortController, unsubs: Unsu
     scroll: window.scrollY,
     bodyAttributes,
     cacheKey,
+    extra,
   };
 
   pageCache.push(newPage);
