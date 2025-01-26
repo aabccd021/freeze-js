@@ -76,9 +76,13 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   for (const [src, hook] of Object.entries(hooks)) {
     if ("pageLoad" in hook && typeof hook["pageLoad"] === "function") {
-      hook["pageLoad"]({
-        cache: cache?.extra[src] ?? {},
-      });
+      try {
+        hook["pageLoad"]({
+          cache: cache?.extra[src] ?? {},
+        });
+      } catch (e) {
+        console.error(`Error in ${src} pageLoad hook:`, e);
+      }
     }
   }
 
@@ -140,7 +144,11 @@ function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks
 
   for (const [src, hook] of Object.entries(hooks)) {
     if ("pageUnload" in hook && typeof hook["pageUnload"] === "function") {
-      extra[src] = hook["pageUnload"]();
+      try {
+        extra[src] = hook["pageUnload"]();
+      } catch (e) {
+        console.error(`Error in ${src} pageUnload hook:`, e);
+      }
     }
   }
 
