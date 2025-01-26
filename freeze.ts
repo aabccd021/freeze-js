@@ -29,7 +29,9 @@ function getPageCache(url: RelPath): Page | undefined {
   return undefined;
 }
 
-type Unsub = () => void;
+type FreezeHooks = Record<string, () => unknown>;
+
+type Hooks = Record<string, FreezeHooks>;
 
 async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   if (cache !== undefined) {
@@ -49,38 +51,32 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     history.pushState("freeze", "", url.pathname + url.search);
   }
 
-  const pageLoads = Array.from(document.querySelectorAll("script"))
+  const moduleLoadPromises = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script): Promise<[string, Unsub] | undefined> => {
-      const module = await import(script.src);
-      if (
-        typeof module === "object" &&
-        module !== null &&
-        "freezePageLoad" in module &&
-        typeof module.freezePageLoad === "function"
-      ) {
-        const pageLoadPromise = await module.freezePageLoad({
-          cache: cache?.extra[script.src] ?? {},
-        });
-        return [script.src, pageLoadPromise];
-      }
-      return undefined;
-    });
+    .map(async (script) => [script.src, await import(script.src)] as const);
 
-  const pageLoadResults = await Promise.allSettled(pageLoads);
+  const moduleLoadResults = await Promise.allSettled(moduleLoadPromises);
 
-  const unsubs = pageLoadResults
-    .map((unsub) => {
-      if (unsub.status === "fulfilled") {
-        return unsub.value;
-      }
-      return undefined;
-    })
-    .filter((unsub) => unsub !== undefined);
+  for (const moduleLoadResult of moduleLoadResults) {
+    if (moduleLoadResult.status === "rejected") {
+      console.error(moduleLoadResult.reason);
+    }
+  }
 
-  for (const pageLoadResult of pageLoadResults) {
-    if (pageLoadResult.status === "rejected") {
-      console.error(pageLoadResult.reason);
+  const modules = moduleLoadResults
+    .filter((moduleLoadResult) => moduleLoadResult.status === "fulfilled")
+    .map((moduleLoadResult) => moduleLoadResult.value);
+
+  const hooks: Hooks = {};
+  for (const [src, module] of modules) {
+    if ("freezeHooks" in module && typeof module.freezeHooks === "object" && module.freezeHooks !== null) {
+      hooks[src] = module.freezeHooks as FreezeHooks;
+    }
+  }
+
+  for (const hook of Object.values(hooks)) {
+    if ("pageLoad" in hook && typeof hook["pageLoad"] === "function") {
+      hook["pageLoad"]();
     }
   }
 
@@ -101,7 +97,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         }
         e.preventDefault();
         if (shouldFreeze) {
-          freezePage(url, abortController, unsubs);
+          freezePage(url, abortController, hooks);
         }
         await restorePage(nextUrl, nextCache);
       },
@@ -113,14 +109,14 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     return;
   }
 
-  window.addEventListener("pagehide", () => freezePage(url, abortController, unsubs), {
+  window.addEventListener("pagehide", () => freezePage(url, abortController, hooks), {
     signal: abortController.signal,
   });
 
   window.addEventListener(
     "popstate",
     (event) => {
-      freezePage(url, abortController, unsubs);
+      freezePage(url, abortController, hooks);
       if (event.state !== "freeze") {
         window.location.reload();
         return;
@@ -136,11 +132,14 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   );
 }
 
-function freezePage(url: RelPath, abortController: AbortController, unsubs: [string, Unsub][]): void {
+function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks): void {
   abortController.abort();
   const extra: Record<string, unknown> = {};
-  for (const [src, unsub] of unsubs) {
-    extra[src] = unsub();
+
+  for (const [src, hook] of Object.entries(hooks)) {
+    if ("pageUnload" in hook && typeof hook["pageUnload"] === "function") {
+      extra[src] = hook["pageUnload"]();
+    }
   }
 
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);

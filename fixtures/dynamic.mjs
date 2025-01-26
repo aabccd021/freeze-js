@@ -1,21 +1,7 @@
-/**
- * @typedef {Function} Unsub
- * @returns {void}
- */
+let h1;
 
-/**
- * @typedef {Object} VilInitEvent
- * @property {Element} element
- * @property {string} listId
- */
-
-/**
- * @typedef {Function} InitChild
- * @param {VilInitEvent} _event
- * @returns {Promise<Unsub | undefined>}
- */
-export async function freezePageLoad(_event) {
-  const h1 = document.createElement("h1");
+async function pageLoad() {
+  h1 = document.createElement("h1");
   h1.textContent = "H1Dy";
   h1.dataset["testid"] = "main";
   document.body.appendChild(h1);
@@ -25,8 +11,13 @@ export async function freezePageLoad(_event) {
   h1.addEventListener("click", () => {
     console.warn("click dynamic");
   });
-
-  return () => {
-    h1.remove();
-  };
 }
+
+function pageUnload() {
+  h1.remove();
+}
+
+export const freezeHooks = {
+  pageLoad,
+  pageUnload,
+};
