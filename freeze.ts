@@ -29,7 +29,7 @@ function getPageCache(url: RelPath): Page | undefined {
   return undefined;
 }
 
-type FreezeHooks = Record<string, () => unknown>;
+type FreezeHooks = Record<string, (...args: unknown[]) => unknown>;
 
 type Hooks = Record<string, FreezeHooks>;
 
@@ -74,9 +74,11 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     }
   }
 
-  for (const hook of Object.values(hooks)) {
+  for (const [src, hook] of Object.entries(hooks)) {
     if ("pageLoad" in hook && typeof hook["pageLoad"] === "function") {
-      hook["pageLoad"]();
+      hook["pageLoad"]({
+        cache: cache?.extra[src] ?? {},
+      });
     }
   }
 
