@@ -48,28 +48,28 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     history.pushState("freeze", "", url.pathname + url.search);
   }
 
-  const moduleLoadPromises = Array.from(document.querySelectorAll("script"))
+  const hookLoadPromises = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map((script) => import(script.src));
+    .map(async (script) => {
+      const module = await import(script.src);
+      if ("freezeHooks" in module) {
+        return await module.freezeHooks;
+      }
+      return undefined;
+    });
 
-  const moduleLoadResults = await Promise.allSettled(moduleLoadPromises);
+  const hookLoadResults = await Promise.allSettled(hookLoadPromises);
 
-  for (const moduleLoadResult of moduleLoadResults) {
-    if (moduleLoadResult.status === "rejected") {
-      console.error(moduleLoadResult.reason);
+  for (const hookLoadResult of hookLoadResults) {
+    if (hookLoadResult.status === "rejected") {
+      console.error(hookLoadResult.reason);
     }
   }
 
-  const modules = moduleLoadResults
-    .filter((moduleLoadResult) => moduleLoadResult.status === "fulfilled")
-    .map((moduleLoadResult) => moduleLoadResult.value);
-
-  const hooks: FreezeHooks[] = [];
-  for (const module of modules) {
-    if ("freezeHooks" in module && typeof module.freezeHooks === "object" && module.freezeHooks !== null) {
-      hooks.push(module.freezeHooks as FreezeHooks);
-    }
-  }
+  const hooks = hookLoadResults
+    .filter((hookLoadResult) => hookLoadResult.status === "fulfilled")
+    .map((hookLoadResult) => hookLoadResult.value)
+    .filter((hook) => hook !== undefined);
 
   for (const hook of hooks) {
     if ("pageLoad" in hook && typeof hook["pageLoad"] === "function") {
