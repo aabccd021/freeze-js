@@ -53,7 +53,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     .map(async (script) => {
       const module = await import(script.src);
       if ("freezeHooks" in module) {
-        return await module.freezeHooks;
+        return await module.freezeHooks();
       }
       return undefined;
     });
