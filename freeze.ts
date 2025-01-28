@@ -6,7 +6,6 @@ type Page = {
   bodyHtml: string;
   bodyAttributes: [string, string][];
   scroll: number;
-  extra: Record<string, unknown>;
 };
 
 function currentUrl(): RelPath {
@@ -31,8 +30,6 @@ function getPageCache(url: RelPath): Page | undefined {
 
 type FreezeHooks = Record<string, (...args: unknown[]) => unknown>;
 
-type Hooks = Record<string, FreezeHooks>;
-
 async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   if (cache !== undefined) {
     document.body.innerHTML = cache.bodyHtml;
@@ -53,7 +50,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const moduleLoadPromises = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script) => [script.src, await import(script.src)] as const);
+    .map((script) => import(script.src));
 
   const moduleLoadResults = await Promise.allSettled(moduleLoadPromises);
 
@@ -67,21 +64,19 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     .filter((moduleLoadResult) => moduleLoadResult.status === "fulfilled")
     .map((moduleLoadResult) => moduleLoadResult.value);
 
-  const hooks: Hooks = {};
-  for (const [src, module] of modules) {
+  const hooks: FreezeHooks[] = [];
+  for (const module of modules) {
     if ("freezeHooks" in module && typeof module.freezeHooks === "object" && module.freezeHooks !== null) {
-      hooks[src] = module.freezeHooks as FreezeHooks;
+      hooks.push(module.freezeHooks as FreezeHooks);
     }
   }
 
-  for (const [src, hook] of Object.entries(hooks)) {
+  for (const hook of hooks) {
     if ("pageLoad" in hook && typeof hook["pageLoad"] === "function") {
       try {
-        hook["pageLoad"]({
-          cache: cache?.extra[src] ?? {},
-        });
+        hook["pageLoad"]();
       } catch (e) {
-        console.error(`Error in ${src} pageLoad hook:`, e);
+        console.error("Error in pageLoad hook:", e);
       }
     }
   }
@@ -138,16 +133,15 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   );
 }
 
-function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks): void {
+function freezePage(url: RelPath, abortController: AbortController, hooks: FreezeHooks[]): void {
   abortController.abort();
-  const extra: Record<string, unknown> = {};
 
-  for (const [src, hook] of Object.entries(hooks)) {
+  for (const hook of hooks) {
     if ("pageUnload" in hook && typeof hook["pageUnload"] === "function") {
       try {
-        extra[src] = hook["pageUnload"]();
+        hook["pageUnload"]();
       } catch (e) {
-        console.error(`Error in ${src} pageUnload hook:`, e);
+        console.error("Error in pageUnload hook:", e);
       }
     }
   }
@@ -169,7 +163,6 @@ function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks
     scroll: window.scrollY,
     bodyAttributes,
     cacheKey,
-    extra,
   };
 
   pageCache.push(newPage);
