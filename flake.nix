@@ -50,6 +50,11 @@
         touch $out
       '';
 
+      exportHookJs = pkgs.fetchurl {
+        url = "https://unpkg.com/export-hook-js";
+        hash = "sha256-XzwPlVm2Qc/kHQC93XDGQpvdhdcldOW1qgsq8xOobt4=";
+      };
+
       serve = pkgs.writeShellApplication {
         name = "serve";
         text = ''
@@ -57,6 +62,8 @@
           if command -v git &> /dev/null; then
             root=$(git rev-parse --show-toplevel)
           fi
+          cp -L ${exportHookJs} ./fixtures/export-hook.js
+          chmod 600 ./fixtures/export-hook.js
           ${pkgs.esbuild}/bin/esbuild  "$root/freeze.ts" \
             --bundle \
             --target=es6 \
@@ -69,10 +76,7 @@
 
       tests = pkgs.runCommandNoCCLocal "tests"
         {
-          buildInputs = [
-            pkgs.nodejs
-            serve
-          ];
+          buildInputs = [ pkgs.nodejs serve ];
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
         export IS_NIX_BUILD=1
@@ -87,6 +91,14 @@
         node_modules/playwright/cli.js test
         touch $out
       '';
+
+      test = pkgs.writeShellApplication {
+        name = "test";
+        text = ''
+          ${pkgs.nodejs}/bin/npm install
+          ${pkgs.nodejs}/bin/npx playwright test
+        '';
+      };
 
       packages = {
         formatting = treefmtEval.config.build.check self;
@@ -114,13 +126,23 @@
           export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
         '';
         buildInputs = [
+          serve
           pkgs.nodejs
           pkgs.biome
           pkgs.typescript
-          serve
         ];
       };
 
+      apps.x86_64-linux = {
+        test = {
+          type = "app";
+          program = "${test}/bin/test";
+        };
+        serve = {
+          type = "app";
+          program = "${serve}/bin/serve";
+        };
+      };
 
     };
 }

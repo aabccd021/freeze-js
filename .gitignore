@@ -4,3 +4,4 @@ node_modules
 result
 test-results
 fixtures/freeze.js
+fixtures/export-hook.js
