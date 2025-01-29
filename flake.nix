@@ -52,7 +52,7 @@
 
       exportHookJs = pkgs.fetchurl {
         url = "https://unpkg.com/export-hook-js";
-        hash = "sha256-XzwPlVm2Qc/kHQC93XDGQpvdhdcldOW1qgsq8xOobt4=";
+        hash = "sha256-1+gDF8hDqxbR/ZodBi28qnHP0YLBpXl6vOdU+N/yA5I=";
       };
 
       serve = pkgs.writeShellApplication {
