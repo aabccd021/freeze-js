@@ -8,7 +8,13 @@
       }
     </style>
     <script src="/freeze.js" type="module"></script>
-    <script src="/increment.mjs" type="module"></script>
+    <script src="/hook.mjs" type="module"></script>
+    <script
+      src="/increment.mjs"
+      type="module"
+      data-hook-freeze-page-load="load"
+      data-hook-freeze-page-unload="unload"
+    ></script>
   </head>
   <body data-freeze>
     <h1 data-testid="main">0</h1>

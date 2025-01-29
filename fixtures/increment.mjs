@@ -4,7 +4,7 @@ function onClick() {
 
 let incrementElt;
 
-function pageLoad() {
+export function load() {
   incrementElt = document.querySelector("[data-testid=main]");
   if (incrementElt === null) {
     throw new Error("Absurd");
@@ -15,11 +15,6 @@ function pageLoad() {
   incrementElt.addEventListener("click", onClick);
 }
 
-function pageUnload() {
+export function unload() {
   incrementElt.removeEventListener("click", onClick);
 }
-
-export const hooks = [
-  ["FreezePageLoad", pageLoad],
-  ["FreezePageUnload", pageUnload],
-];
