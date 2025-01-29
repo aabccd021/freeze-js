@@ -92,8 +92,8 @@
         touch $out
       '';
 
-      test = pkgs.writeShellApplication {
-        name = "test";
+      check = pkgs.writeShellApplication {
+        name = "check";
         text = ''
           ${pkgs.nodejs}/bin/npm install
           ${pkgs.nodejs}/bin/npx playwright test
@@ -169,9 +169,9 @@
         ];
       };
 
-      apps.x86_64-linux.test = {
+      apps.x86_64-linux.check = {
         type = "app";
-        program = "${test}/bin/test";
+        program = "${check}/bin/check";
       };
 
       apps.x86_64-linux.serve = {
