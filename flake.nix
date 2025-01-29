@@ -145,6 +145,7 @@
         biome = biome;
         nodeModules = nodeModules;
         tests = tests;
+        publish = publish;
       };
 
       gcroot = packages // {

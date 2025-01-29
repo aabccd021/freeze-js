@@ -1,5 +1,6 @@
 # Todo
 
+- exclude css with src from head to avoid flashing
 - support non module scripts
 - support inline scripts
 - support dynamically rendered anchor
