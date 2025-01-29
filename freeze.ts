@@ -28,7 +28,20 @@ function getPageCache(url: RelPath): Page | undefined {
   return undefined;
 }
 
-type FreezeHooks = Record<string, (...args: unknown[]) => unknown>;
+function invokeHooks(hooks: Hooks[], name: string): void {
+  for (const [hookName, fn] of hooks) {
+    if (hookName !== name) {
+      continue;
+    }
+    try {
+      fn();
+    } catch (e) {
+      console.error(`Error in ${name} hook:`, e);
+    }
+  }
+}
+
+type Hooks = [string, (...args: unknown[]) => unknown];
 
 async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   if (cache !== undefined) {
@@ -50,36 +63,27 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const hookLoadPromises = Array.from(document.querySelectorAll("script"))
     .filter((script) => script.type === "module")
-    .map(async (script) => {
+    .flatMap(async (script) => {
       const module = await import(script.src);
-      if ("freezeHooks" in module) {
-        return await module.freezeHooks();
+      if (!("hooks" in module && Array.isArray(module.hooks))) {
+        return [];
       }
-      return undefined;
+      return module.hooks as Hooks[];
     });
 
-  const hookLoadResults = await Promise.allSettled(hookLoadPromises);
+  const hookLoadResultsNested = await Promise.allSettled(hookLoadPromises);
 
-  for (const hookLoadResult of hookLoadResults) {
+  for (const hookLoadResult of hookLoadResultsNested) {
     if (hookLoadResult.status === "rejected") {
       console.error(hookLoadResult.reason);
     }
   }
 
-  const hooks = hookLoadResults
-    .filter((hookLoadResult) => hookLoadResult.status === "fulfilled")
-    .map((hookLoadResult) => hookLoadResult.value)
-    .filter((hook) => hook !== undefined);
+  const hooks = hookLoadResultsNested
+    .filter((hookLoadResults) => hookLoadResults.status === "fulfilled")
+    .flatMap((hookLoadResults) => hookLoadResults.value);
 
-  for (const hook of hooks) {
-    if ("pageLoad" in hook && typeof hook["pageLoad"] === "function") {
-      try {
-        hook["pageLoad"]();
-      } catch (e) {
-        console.error("Error in pageLoad hook:", e);
-      }
-    }
-  }
+  invokeHooks(hooks, "freezePageLoad");
 
   const abortController = new AbortController();
 
@@ -133,18 +137,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   );
 }
 
-function freezePage(url: RelPath, abortController: AbortController, hooks: FreezeHooks[]): void {
+function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks[]): void {
   abortController.abort();
 
-  for (const hook of hooks) {
-    if ("pageUnload" in hook && typeof hook["pageUnload"] === "function") {
-      try {
-        hook["pageUnload"]();
-      } catch (e) {
-        console.error("Error in pageUnload hook:", e);
-      }
-    }
-  }
+  invokeHooks(hooks, "freezePageUnload");
 
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
 

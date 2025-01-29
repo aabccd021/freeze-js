@@ -17,10 +17,7 @@ function pageUnload() {
   h1.remove();
 }
 
-export async function freezeHooks() {
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  return {
-    pageLoad,
-    pageUnload,
-  };
-}
+export const hooks = [
+  ["freezePageLoad", pageLoad],
+  ["freezePageUnload", pageUnload],
+];

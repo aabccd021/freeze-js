@@ -19,9 +19,7 @@ function pageUnload() {
   incrementElt.removeEventListener("click", onClick);
 }
 
-export function freezeHooks() {
-  return {
-    pageLoad,
-    pageUnload,
-  };
-}
+export const hooks = [
+  ["freezePageLoad", pageLoad],
+  ["freezePageUnload", pageUnload],
+];
