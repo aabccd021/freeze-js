@@ -20,6 +20,6 @@ function pageUnload() {
 }
 
 export const hooks = [
-  ["freezePageLoad", pageLoad],
-  ["freezePageUnload", pageUnload],
+  ["FreezePageLoad", pageLoad],
+  ["FreezePageUnload", pageUnload],
 ];

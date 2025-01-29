@@ -83,7 +83,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     .filter((hookLoadResults) => hookLoadResults.status === "fulfilled")
     .flatMap((hookLoadResults) => hookLoadResults.value);
 
-  invokeHooks(hooks, "freezePageLoad");
+  invokeHooks(hooks, "FreezePageLoad");
 
   const abortController = new AbortController();
 
@@ -140,7 +140,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks[]): void {
   abortController.abort();
 
-  invokeHooks(hooks, "freezePageUnload");
+  invokeHooks(hooks, "FreezePageUnload");
 
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
 
