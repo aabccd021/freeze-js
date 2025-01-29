@@ -2,6 +2,7 @@
 .gcroot
 node_modules
 result
+dist
 test-results
 fixtures/freeze.js
 fixtures/export-hook.js

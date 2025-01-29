@@ -1,8 +1,19 @@
 {
-  "name": "vanilla-virtualized",
-  "private": true,
+  "name": "freeze",
   "version": "0.0.1",
-  "type": "module",
+  "description": "Freeze page that dynamically rendered",
+  "author": "aabccd021",
+  "license": "MIT",
+  "files": ["dist"],
+  "main": "dist/.min.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aabccd021/freeze-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aabccd021/freeze-js/issues"
+  },
+  "homepage": "https://github.com/aabccd021/freeze-js#readme",
   "devDependencies": {
     "@playwright/test": "1.47.2",
     "@types/node": "^22.10.7"

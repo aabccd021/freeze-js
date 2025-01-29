@@ -100,9 +100,45 @@
         '';
       };
 
+      dist = pkgs.runCommandNoCCLocal "dist" { } ''
+        mkdir  $out
+        ${pkgs.esbuild}/bin/esbuild ${./freeze.ts} \
+          --bundle \
+          --format=esm \
+          --minify \
+          --sourcemap \
+          --outfile="$out/freeze.min.js"
+        ${pkgs.esbuild}/bin/esbuild ${./freeze.ts} \
+          --bundle \
+          --format=esm \
+          --target=es6 \
+          --minify \
+          --sourcemap \
+          --outfile="$out/freeze.es6.min.js"
+      '';
+
+      publish = pkgs.writeShellApplication {
+        name = "publish";
+        text = ''
+          nix flake check
+          NPM_TOKEN=''${NPM_TOKEN:-}
+          if [ -n "$NPM_TOKEN" ]; then
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          fi
+          result=$(nix build --no-link --print-out-paths .#dist)
+          rm -rf dist
+          mkdir dist
+          cp -Lr "$result"/* dist
+          chmod 400 dist/*
+          npm publish --dry-run
+          npm publish || true
+        '';
+      };
+
       packages = {
         formatting = treefmtEval.config.build.check self;
         tsc = tsc;
+        dist = dist;
         biome = biome;
         nodeModules = nodeModules;
         tests = tests;
@@ -133,15 +169,19 @@
         ];
       };
 
-      apps.x86_64-linux = {
-        test = {
-          type = "app";
-          program = "${test}/bin/test";
-        };
-        serve = {
-          type = "app";
-          program = "${serve}/bin/serve";
-        };
+      apps.x86_64-linux.test = {
+        type = "app";
+        program = "${test}/bin/test";
+      };
+
+      apps.x86_64-linux.serve = {
+        type = "app";
+        program = "${serve}/bin/serve";
+      };
+
+      apps.x86_64-linux.publish = {
+        type = "app";
+        program = "${publish}/bin/publish";
       };
 
     };
