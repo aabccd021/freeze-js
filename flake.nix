@@ -27,8 +27,8 @@
       };
 
       tsc = pkgs.runCommandNoCCLocal "tsc" { } ''
-        cp -L ${./freeze.ts} ./freeze.ts
-        cp -L ${./freeze.test.ts} ./freeze.test.ts
+        cp -L ${./freeze-page.ts} ./freeze-page.ts
+        cp -L ${./freeze-page.test.ts} ./freeze-page.test.ts
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
         cp -Lr ${./fixtures} ./fixtures
@@ -39,8 +39,8 @@
 
       biome = pkgs.runCommandNoCCLocal "biome" { } ''
         cp -L ${./biome.jsonc} ./biome.jsonc
-        cp -L ${./freeze.ts} ./freeze.ts
-        cp -L ${./freeze.test.ts} ./freeze.test.ts
+        cp -L ${./freeze-page.ts} ./freeze-page.ts
+        cp -L ${./freeze-page.test.ts} ./freeze-page.test.ts
         cp -L ${./package.json} ./package.json
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
@@ -64,7 +64,7 @@
           fi
           cp -L ${exportHookJs} ./fixtures/export-hook.js
           chmod 600 ./fixtures/export-hook.js
-          ${pkgs.esbuild}/bin/esbuild  "$root/freeze.ts" \
+          ${pkgs.esbuild}/bin/esbuild  "$root/freeze-page.ts" \
             --bundle \
             --target=es6 \
             --format=esm \
@@ -80,8 +80,8 @@
         } ''
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
         export IS_NIX_BUILD=1
-        cp -L ${./freeze.ts} ./freeze.ts
-        cp -L ${./freeze.test.ts} ./freeze.test.ts
+        cp -L ${./freeze-page.ts} ./freeze-page.ts
+        cp -L ${./freeze-page.test.ts} ./freeze-page.test.ts
         cp -L ${./package.json} ./package.json
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
@@ -102,19 +102,19 @@
 
       dist = pkgs.runCommandNoCCLocal "dist" { } ''
         mkdir  $out
-        ${pkgs.esbuild}/bin/esbuild ${./freeze.ts} \
+        ${pkgs.esbuild}/bin/esbuild ${./freeze-page.ts} \
           --bundle \
           --format=esm \
           --minify \
           --sourcemap \
-          --outfile="$out/freeze.min.js"
-        ${pkgs.esbuild}/bin/esbuild ${./freeze.ts} \
+          --outfile="$out/freeze-page.min.js"
+        ${pkgs.esbuild}/bin/esbuild ${./freeze-page.ts} \
           --bundle \
           --format=esm \
           --target=es6 \
           --minify \
           --sourcemap \
-          --outfile="$out/freeze.es6.min.js"
+          --outfile="$out/freeze-page.es6.min.js"
       '';
 
       publish = pkgs.writeShellApplication {

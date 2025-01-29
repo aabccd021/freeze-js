@@ -8,12 +8,12 @@
   "main": "dist/.min.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aabccd021/freeze-js.git"
+    "url": "git+https://github.com/aabccd021/freeze-page-js.git"
   },
   "bugs": {
-    "url": "https://github.com/aabccd021/freeze-js/issues"
+    "url": "https://github.com/aabccd021/freeze-page-js/issues"
   },
-  "homepage": "https://github.com/aabccd021/freeze-js#readme",
+  "homepage": "https://github.com/aabccd021/freeze-page-js#readme",
   "devDependencies": {
     "@playwright/test": "1.47.2",
     "@types/node": "^22.10.7"

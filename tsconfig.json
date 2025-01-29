@@ -26,5 +26,5 @@
     "strict": true,
     "useUnknownInCatchVariables": true
   },
-  "exclude": ["fixtures/freeze.js"]
+  "exclude": ["fixtures/freeze-page.js"]
 }

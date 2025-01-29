@@ -87,7 +87,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
 
   const abortController = new AbortController();
 
-  const shouldFreeze = document.body.hasAttribute("data-freeze");
+  const shouldFreeze = document.body.hasAttribute("data-freeze-page");
 
   const anchors = document.body.querySelectorAll("a");
   for (const anchor of Array.from(anchors)) {
