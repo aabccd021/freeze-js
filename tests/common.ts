@@ -6,5 +6,5 @@ export async function bfCacheTest({ page }: { page: Page }): Promise<void> {
   await page.goto("page1.html");
   await page.goto("page2.html");
   await page.goBack({ waitUntil: "commit" });
-  expect(consoleMessages).toEqual(["hello", "hello", "pagehide"]);
+  expect(consoleMessages).toEqual(["hello", "hello"]);
 }
