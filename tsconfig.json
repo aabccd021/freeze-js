@@ -25,6 +25,5 @@
     "noUnusedParameters": true,
     "strict": true,
     "useUnknownInCatchVariables": true
-  },
-  "exclude": ["fixtures/freeze-page.js"]
+  }
 }
