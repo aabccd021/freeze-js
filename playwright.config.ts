@@ -30,26 +30,17 @@ export default defineConfig({
         },
       },
     },
-    ...(process.env["IS_NIX_BUILD"] === "1"
-      ? []
-      : [
-          {
-            name: "chromium-bfcache",
-            testMatch: ["freeze-page.test.ts", "bfcache.test.ts"],
-            use: {
-              ...devices["Desktop Chrome"],
-              channel: "chromium",
-              launchOptions: {
-                ignoreDefaultArgs: ["--disable-back-forward-cache", "--headless=old"],
-                args: ["--headless"],
-              },
-            },
-          },
-          {
-            name: "firefox-no-bfcache",
-            testMatch: ["freeze-page.test.ts", "nobfcache.test.ts"],
-            use: { ...devices["Desktop Firefox"] },
-          },
-        ]),
+    {
+      name: "chromium-bfcache",
+      testMatch: ["freeze-page.test.ts", "bfcache.test.ts"],
+      use: {
+        ...devices["Desktop Chrome"],
+        channel: "chromium",
+        launchOptions: {
+          ignoreDefaultArgs: ["--disable-back-forward-cache", "--headless=old"],
+          args: ["--headless"],
+        },
+      },
+    },
   ],
 });

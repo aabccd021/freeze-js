@@ -164,9 +164,6 @@
       formatter.x86_64-linux = treefmtEval.config.build.wrapper;
 
       devShells.x86_64-linux.default = pkgs.mkShellNoCC {
-        shellHook = ''
-          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright.browsers}
-        '';
         buildInputs = [
           serve
           pkgs.nodejs
@@ -178,11 +175,6 @@
       apps.x86_64-linux.check = {
         type = "app";
         program = "${check}/bin/check";
-      };
-
-      apps.x86_64-linux.serve = {
-        type = "app";
-        program = "${serve}/bin/serve";
       };
 
       apps.x86_64-linux.publish = {
