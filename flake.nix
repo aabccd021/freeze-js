@@ -78,6 +78,8 @@
         {
           buildInputs = [ pkgs.nodejs serve ];
         } ''
+        export XDG_CONFIG_HOME="$(pwd)"
+        export XDG_CACHE_HOME="$(pwd)"
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
         export IS_NIX_BUILD=1
         cp -L ${./freeze-page.ts} ./freeze-page.ts

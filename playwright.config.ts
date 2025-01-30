@@ -22,7 +22,13 @@ export default defineConfig({
     {
       name: "chromium-no-bfcache",
       testMatch: ["freeze-page.test.ts", "nobfcache.test.ts"],
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: {
+          ignoreDefaultArgs: ["--headless=old"],
+          args: ["--headless"],
+        },
+      },
     },
     ...(process.env["IS_NIX_BUILD"] === "1"
       ? []

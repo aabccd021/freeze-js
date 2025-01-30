@@ -1,28 +1,12 @@
 {
   "nodes": {
-    "aicommit": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1680116021,
-        "narHash": "sha256-XFx6mvm7FuhycWyXq9YxOsyqcxpNIr2POKqKXMefe6s=",
-        "owner": "nguyenvanduocit",
-        "repo": "ai-commit",
-        "rev": "a8981430fcbde888a378e0cd418edd55d691fb40",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nguyenvanduocit",
-        "repo": "ai-commit",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1736883708,
-        "narHash": "sha256-uQ+NQ0/xYU0N1CnXsa2zghgNaOPxWpMJXSUJJ9W7140=",
+        "lastModified": 1738142207,
+        "narHash": "sha256-NGqpVVxNAHwIicXpgaVqJEJWeyqzoQJ9oc8lnK9+WC4=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "eb62e6aa39ea67e0b8018ba8ea077efe65807dc8",
+        "rev": "9d3ae807ebd2981d593cddd0080856873139aa40",
         "type": "github"
       },
       "original": {
@@ -66,18 +50,17 @@
     },
     "project-utils": {
       "inputs": {
-        "aicommit": "aicommit",
         "nixpkgs": [
           "nixpkgs"
         ],
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1737258229,
-        "narHash": "sha256-jrallOGPSn3iCswTMQEa2njwdtn46R+9khk6/P7JFm8=",
+        "lastModified": 1737346973,
+        "narHash": "sha256-zq5RpZaTZFp90zvhQmL9/pHai9uUIbdvxGu3HwWyR28=",
         "owner": "aabccd021",
         "repo": "project-utils",
-        "rev": "5591eacccfffd19fa17cf35e6b2f83f1261c22c4",
+        "rev": "2b88a9411bbfd8768aa16766f07e3f7262ee4397",
         "type": "github"
       },
       "original": {
@@ -116,11 +99,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1737054102,
-        "narHash": "sha256-saLiCRQ5RtdTnznT/fja7GxcYRAzeY3k8S+IF/2s/2A=",
+        "lastModified": 1738070913,
+        "narHash": "sha256-j6jC12vCFsTGDmY2u1H12lMr62fnclNjuCtAdF1a4Nk=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "97871d416166803134ba64597a1006f3f670fbde",
+        "rev": "bebf27d00f7d10ba75332a0541ac43676985dea3",
         "type": "github"
       },
       "original": {
