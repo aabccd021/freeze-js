@@ -39,9 +39,9 @@ export default defineConfig({
             use: {
               ...devices["Desktop Chrome"],
               channel: "chromium",
-              headless: false,
               launchOptions: {
-                ignoreDefaultArgs: ["--disable-back-forward-cache"],
+                ignoreDefaultArgs: ["--disable-back-forward-cache", "--headless=old"],
+                args: ["--headless"],
               },
             },
           },
