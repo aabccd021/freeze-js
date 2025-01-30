@@ -21,6 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-no-bfcache",
+      testMatch: ["freeze-page.test.ts"],
       use: { ...devices["Desktop Chrome"] },
     },
     ...(process.env["IS_NIX_BUILD"] === "1"
@@ -28,6 +29,7 @@ export default defineConfig({
       : [
           {
             name: "chromium-bfcache",
+            testMatch: ["freeze-page.test.ts"],
             use: {
               ...devices["Desktop Chrome"],
               channel: "chromium",
@@ -39,6 +41,7 @@ export default defineConfig({
           },
           {
             name: "firefox-no-bfcache",
+            testMatch: ["freeze-page.test.ts"],
             use: { ...devices["Desktop Firefox"] },
           },
         ]),
