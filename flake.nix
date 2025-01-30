@@ -94,17 +94,6 @@
         touch $out
       '';
 
-      check = pkgs.writeShellApplication {
-        name = "check";
-        text = ''
-          trap 'cd $(pwd)' EXIT
-          repo_root=$(git rev-parse --show-toplevel)
-          cd "$repo_root" || exit
-          ${pkgs.nodejs}/bin/npm install
-          ${pkgs.nodejs}/bin/npx playwright test
-        '';
-      };
-
       dist = pkgs.runCommandNoCCLocal "dist" { } ''
         mkdir  $out
         ${pkgs.esbuild}/bin/esbuild ${./freeze-page.ts} \
@@ -170,11 +159,6 @@
           pkgs.biome
           pkgs.typescript
         ];
-      };
-
-      apps.x86_64-linux.check = {
-        type = "app";
-        program = "${check}/bin/check";
       };
 
       apps.x86_64-linux.publish = {
