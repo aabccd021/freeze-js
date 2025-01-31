@@ -81,7 +81,6 @@
         export XDG_CONFIG_HOME="$(pwd)"
         export XDG_CACHE_HOME="$(pwd)"
         export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
-        export IS_NIX_BUILD=1
         cp -L ${./freeze-page.ts} ./freeze-page.ts
         cp -L ${./freeze-page.test.ts} ./freeze-page.test.ts
         cp -L ${./package.json} ./package.json
