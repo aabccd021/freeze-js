@@ -1,11 +1,11 @@
 {
   "name": "freeze-page-js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Freeze page that dynamically rendered",
   "author": "aabccd021",
   "license": "MIT",
   "files": ["dist"],
-  "main": "dist/freeze-page.es6.min.js",
+  "main": "dist/freeze-page.min.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aabccd021/freeze-page-js.git"

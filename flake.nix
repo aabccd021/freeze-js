@@ -66,7 +66,7 @@
           chmod 600 ./fixtures/export-hook.js
           ${pkgs.esbuild}/bin/esbuild  "$root/freeze-page.ts" \
             --bundle \
-            --target=es6 \
+            --target=esnext \
             --format=esm \
             --outdir="$root/fixtures" \
             --servedir="$root/fixtures" \
@@ -98,16 +98,23 @@
         ${pkgs.esbuild}/bin/esbuild ${./freeze-page.ts} \
           --bundle \
           --format=esm \
+          --target=esnext \
+          --sourcemap \
+          --outfile="$out/freeze-page.esnext.js"
+        ${pkgs.esbuild}/bin/esbuild ${./freeze-page.ts} \
+          --bundle \
+          --format=esm \
+          --target=esnext \
           --minify \
           --sourcemap \
-          --outfile="$out/freeze-page.min.js"
+          --outfile="$out/freeze-page.esnext.min.js"
         ${pkgs.esbuild}/bin/esbuild ${./freeze-page.ts} \
           --bundle \
           --format=esm \
           --target=es6 \
           --minify \
           --sourcemap \
-          --outfile="$out/freeze-page.es6.min.js"
+          --outfile="$out/freeze-page.min.js"
       '';
 
       publish = pkgs.writeShellApplication {
