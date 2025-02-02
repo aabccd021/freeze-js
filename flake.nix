@@ -23,7 +23,7 @@
         programs.shfmt.enable = true;
         settings.formatter.prettier.priority = 1;
         settings.formatter.biome.priority = 2;
-        settings.global.excludes = [ "LICENSE" "*.ico" ];
+        settings.global.excludes = [ "LICENSE" ];
       };
 
       tsc = pkgs.runCommandNoCCLocal "tsc" { } ''
@@ -31,7 +31,7 @@
         cp -L ${./freeze-page.test.ts} ./freeze-page.test.ts
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${./fixtures} ./fixtures
+        cp -Lr ${./stories} ./stories
         cp -Lr ${nodeModules} ./node_modules
         ${pkgs.typescript}/bin/tsc
         touch $out
@@ -44,7 +44,7 @@
         cp -L ${./package.json} ./package.json
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${./fixtures} ./fixtures
+        cp -Lr ${./stories} ./stories
         cp -Lr ${nodeModules} ./node_modules
         ${pkgs.biome}/bin/biome check --error-on-warnings
         touch $out
@@ -62,14 +62,14 @@
           if command -v git &> /dev/null; then
             root=$(git rev-parse --show-toplevel)
           fi
-          cp -L ${exportHookJs} ./fixtures/export-hook.js
-          chmod 600 ./fixtures/export-hook.js
+          cp -L ${exportHookJs} ./stories/export-hook.js
+          chmod 600 ./stories/export-hook.js
           ${pkgs.esbuild}/bin/esbuild  "$root/freeze-page.ts" \
             --bundle \
             --target=esnext \
             --format=esm \
-            --outdir="$root/fixtures" \
-            --servedir="$root/fixtures" \
+            --outdir="$root/stories" \
+            --servedir="$root/stories" \
             --watch
         '';
       };
@@ -87,8 +87,8 @@
         cp -L ${./playwright.config.ts} ./playwright.config.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
         cp -Lr ${nodeModules} ./node_modules
-        cp -Lr ${./fixtures} ./fixtures
-        chmod -R 700 ./fixtures
+        cp -Lr ${./stories} ./stories
+        chmod -R 700 ./stories
         node_modules/playwright/cli.js test
         touch $out
       '';
