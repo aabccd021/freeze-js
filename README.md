@@ -1,6 +1,5 @@
 # Todo
 
-- use testinfo to differentiate bfcache and non-bfcache tests
 - exclude css with src from head to avoid flashing
 - support non module scripts
 - support inline scripts
