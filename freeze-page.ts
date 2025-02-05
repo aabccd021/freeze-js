@@ -8,6 +8,14 @@ type Page = {
   scroll: number;
 };
 
+type Hook = (...args: unknown[]) => unknown;
+
+type LoadHooks = <T extends string[]>(hookNames: T) => Promise<{ [K in keyof T]: Hook[] }>;
+
+type HookLoaderModule = {
+  loadHooks: LoadHooks;
+};
+
 function currentUrl(): RelPath {
   return { pathname: location.pathname, search: location.search };
 }
@@ -27,21 +35,6 @@ function getPageCache(url: RelPath): Page | undefined {
 
   return undefined;
 }
-
-function invokeHooks(hooks: Hooks[], name: string): void {
-  for (const [hookName, fn] of hooks) {
-    if (hookName !== name) {
-      continue;
-    }
-    try {
-      fn();
-    } catch (e) {
-      console.error(`Error in ${name} hook:`, e);
-    }
-  }
-}
-
-type Hooks = [string, (...args: unknown[]) => unknown];
 
 function getCssHref(el: Element): string | undefined {
   if (!(el instanceof HTMLLinkElement) || el.rel !== "stylesheet") {
@@ -88,29 +81,21 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     history.pushState("freeze", "", url.pathname + url.search);
   }
 
-  const hookLoadPromises = Array.from(document.querySelectorAll("script"))
-    .filter((script) => script.type === "module")
-    .flatMap(async (script) => {
-      const module = await import(script.src);
-      if (!("hooks" in module && Array.isArray(module.hooks))) {
-        return [];
-      }
-      return module.hooks as Hooks[];
-    });
+  let pageLoadHooks: Hook[] = [];
+  let pageUnloadHooks: Hook[] = [];
 
-  const hookLoadResultsNested = await Promise.allSettled(hookLoadPromises);
-
-  for (const hookLoadResult of hookLoadResultsNested) {
-    if (hookLoadResult.status === "rejected") {
-      console.error(hookLoadResult.reason);
-    }
+  const hookLoader = document.querySelector<HTMLScriptElement>("script[data-hook-loader]");
+  if (hookLoader !== null) {
+    const hookLoaderModule: HookLoaderModule = await import(hookLoader.src);
+    [pageLoadHooks, pageUnloadHooks] = await hookLoaderModule.loadHooks([
+      "FreezePageLoad",
+      "FreezePageUnload",
+    ] as const);
   }
 
-  const hooks = hookLoadResultsNested
-    .filter((hookLoadResults) => hookLoadResults.status === "fulfilled")
-    .flatMap((hookLoadResults) => hookLoadResults.value);
-
-  invokeHooks(hooks, "FreezePageLoad");
+  for (const pageLoadHook of pageLoadHooks) {
+    pageLoadHook();
+  }
 
   const abortController = new AbortController();
 
@@ -129,7 +114,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
         }
         e.preventDefault();
         if (shouldFreeze) {
-          freezePage(url, abortController, hooks);
+          freezePage(url, abortController, pageUnloadHooks);
         }
         await restorePage(nextUrl, nextCache);
       },
@@ -141,20 +126,14 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     return;
   }
 
-  window.addEventListener(
-    "pagehide",
-    () => {
-      freezePage(url, abortController, hooks);
-    },
-    {
-      signal: abortController.signal,
-    },
-  );
+  window.addEventListener("pagehide", () => freezePage(url, abortController, pageUnloadHooks), {
+    signal: abortController.signal,
+  });
 
   window.addEventListener(
     "popstate",
     (event) => {
-      freezePage(url, abortController, hooks);
+      freezePage(url, abortController, pageUnloadHooks);
       if (event.state !== "freeze") {
         window.location.reload();
         return;
@@ -170,10 +149,12 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   );
 }
 
-function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks[]): void {
+function freezePage(url: RelPath, abortController: AbortController, pageUnloadHooks: Hook[]): void {
   abortController.abort();
 
-  invokeHooks(hooks, "FreezePageUnload");
+  for (const pageUnloadHook of pageUnloadHooks) {
+    pageUnloadHook();
+  }
 
   const bodyAttributes = Array.from(document.body.attributes).map((attr): [string, string] => [attr.name, attr.value]);
 

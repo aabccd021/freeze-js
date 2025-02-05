@@ -10,7 +10,7 @@ new MutationObserver((mutations) => {
   }
 }).observe(document.head, { childList: true, subtree: true });
 
-async function pageLoad() {
+export async function pageLoad() {
   h1 = document.createElement("h1");
   h1.textContent = "H1Dy";
   h1.dataset["testid"] = "main";
@@ -23,11 +23,6 @@ async function pageLoad() {
   });
 }
 
-function pageUnload() {
+export function pageUnload() {
   h1.remove();
 }
-
-export const hooks = [
-  ["FreezePageLoad", pageLoad],
-  ["FreezePageUnload", pageUnload],
-];

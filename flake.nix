@@ -52,7 +52,7 @@
 
       exportHookJs = pkgs.fetchurl {
         url = "https://unpkg.com/export-hook-js@latest/dist/export-hook.esnext.js";
-        hash = "sha256-TvWKQ14VjHh7ca/zGvcTvfpanH8x7hQINKPb4hu9sOs=";
+        hash = "sha256-1duEckbWp4kmIm4LtYwzig0Wb1/Vp1gXmWswBtcuYVA=";
       };
 
       invokeHookJs = pkgs.fetchurl {

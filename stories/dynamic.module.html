@@ -7,7 +7,13 @@
       type="module"
       data-invoke-hook="load"
     ></script>
-    <script src="/dynamic.mjs" type="module"></script>
+    <script
+      src="/dynamic.mjs"
+      type="module"
+      data-export-hook-freeze-page-load="pageLoad"
+      data-export-hook-freeze-page-unload="pageUnload"
+    ></script>
+    <script src="/export-hook.js" type="module" data-hook-loader></script>
     <script src="/invoke-hook.js" type="module"></script>
     <link rel="stylesheet" href="/style.css" />
   </head>
