@@ -197,17 +197,17 @@ function onPageShow(event?: PageTransitionEvent): void {
     return;
   }
 
-  const shouldRestoreFromCache =
+  const restoreFromCache =
     (!event?.persisted && perfNavigation.type === "back_forward") ||
     (event?.persisted && perfNavigation.type === "navigate");
 
-  if (!shouldRestoreFromCache) {
-    restorePage(url);
+  if (restoreFromCache) {
+    const cache = getPageCache(url);
+    restorePage(url, cache);
     return;
   }
 
-  const cache = getPageCache(url);
-  restorePage(url, cache);
+  restorePage(url);
 }
 
 export function load(): void {
