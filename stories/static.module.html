@@ -7,8 +7,13 @@
         color-scheme: dark;
       }
     </style>
-    <script src="/freeze-page.js" type="module"></script>
+    <script
+      src="/freeze-page.js"
+      type="module"
+      data-invoke-hook="load"
+    ></script>
     <script src="/static.mjs" type="module"></script>
+    <script src="/invoke-hook.js" type="module"></script>
   </head>
   <body>
     <h1 data-testid="main">H1St</h1>

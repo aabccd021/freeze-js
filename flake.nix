@@ -55,6 +55,11 @@
         hash = "sha256-TvWKQ14VjHh7ca/zGvcTvfpanH8x7hQINKPb4hu9sOs=";
       };
 
+      invokeHookJs = pkgs.fetchurl {
+        url = "https://unpkg.com/export-hook-js@latest/dist/invoke-hook.esnext.js";
+        hash = "sha256-QZ99/CdkZ8DtTWbYB8gjXkrJU7OmutioJerJO3ne+vA=";
+      };
+
       serve = pkgs.writeShellApplication {
         name = "serve";
         text = ''
@@ -63,7 +68,8 @@
             root=$(git rev-parse --show-toplevel)
           fi
           cp -L ${exportHookJs} ./stories/export-hook.js
-          chmod 600 ./stories/export-hook.js
+          cp -L ${invokeHookJs} ./stories/invoke-hook.js
+          chmod 600 ./stories/*.js
           ${pkgs.esbuild}/bin/esbuild  "$root/freeze-page.ts" \
             --bundle \
             --target=esnext \

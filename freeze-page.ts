@@ -174,7 +174,7 @@ function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks
   }
 }
 
-window.addEventListener("pageshow", (event) => {
+function onPageShow(event?: PageTransitionEvent): void {
   const url = currentUrl();
 
   const perfNavigation = performance.getEntriesByType("navigation")[0];
@@ -183,8 +183,8 @@ window.addEventListener("pageshow", (event) => {
   }
 
   const shouldRestoreFromCache =
-    (!event.persisted && perfNavigation.type === "back_forward") ||
-    (event.persisted && perfNavigation.type === "navigate");
+    (!event?.persisted && perfNavigation.type === "back_forward") ||
+    (event?.persisted && perfNavigation.type === "navigate");
 
   if (!shouldRestoreFromCache) {
     restorePage(url);
@@ -193,4 +193,9 @@ window.addEventListener("pageshow", (event) => {
 
   const cache = getPageCache(url);
   restorePage(url, cache);
-});
+}
+
+export function load(): void {
+  window.addEventListener("pageshow", onPageShow);
+  onPageShow();
+}
