@@ -126,18 +126,25 @@
       publish = pkgs.writeShellApplication {
         name = "publish";
         text = ''
+          published_version=$(npm view . version)
+          current_version=$(${pkgs.jq}/bin/jq -r .version package.json)
+          if [ "$published_version" = "$current_version" ]; then
+            echo "Version $current_version is already published"
+            exit 0
+          fi
+          echo "Publishing version $current_version"
+
           nix flake check
           NPM_TOKEN=''${NPM_TOKEN:-}
           if [ -n "$NPM_TOKEN" ]; then
             npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
           fi
-          result=$(nix build --no-link --print-out-paths .#dist)
+          dist_result=$(nix build --no-link --print-out-paths .#dist)
           rm -rf dist
           mkdir dist
-          cp -Lr "$result"/* dist
+          cp -Lr "$dist_result"/* dist
           chmod 400 dist/*
-          npm publish --dry-run
-          npm publish || true
+          npm publish 
         '';
       };
 
