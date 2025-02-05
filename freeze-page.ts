@@ -190,14 +190,16 @@ function onPageShow(event?: PageTransitionEvent): void {
     throw new Error(`Unknown performance entry: ${JSON.stringify(perfNavigation)}`);
   }
 
-  const shouldRestoreFromCache =
-    (!event?.persisted && perfNavigation.type === "back_forward") ||
-    (event?.persisted && perfNavigation.type === "navigate");
-
+  // I don't know why but this is necessary to prevent race conditions.
+  // The race condition is kind of reproducible when the tests are run on 6 workers in parallel.
   if (event?.persisted === false && perfNavigation.type === "navigate" && !first) {
     first = true;
     return;
   }
+
+  const shouldRestoreFromCache =
+    (!event?.persisted && perfNavigation.type === "back_forward") ||
+    (event?.persisted && perfNavigation.type === "navigate");
 
   if (!shouldRestoreFromCache) {
     restorePage(url);
