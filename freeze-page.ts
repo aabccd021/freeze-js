@@ -54,7 +54,37 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       document.body.setAttribute(name, value);
     }
 
-    document.head.innerHTML = cache.headHtml;
+    // document.head.innerHTML = cache.headHtml;
+
+    const parser = new DOMParser();
+    const headDoc = parser.parseFromString(cache.headHtml, "text/html");
+
+    const persistedCssHrefs = new Set<string>();
+    for (const headElt of Array.from(headDoc.body.children)) {
+      if (headElt.tagName !== "LINK" || headElt.getAttribute("rel") !== "stylesheet") {
+        continue;
+      }
+      const href = headElt.getAttribute("href");
+      if (href !== null && href !== "") {
+        persistedCssHrefs.add(href);
+        headElt.remove();
+      }
+    }
+
+    for (const headElt of Array.from(document.head.children)) {
+      if (
+        headElt.tagName === "LINK" &&
+        headElt.getAttribute("rel") === "stylesheet" &&
+        persistedCssHrefs.has(headElt.getAttribute("href") ?? "")
+      ) {
+        continue;
+      }
+      headElt.remove();
+    }
+
+    for (const headElt of Array.from(headDoc.head.children)) {
+      document.head.appendChild(headElt);
+    }
 
     window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
 
