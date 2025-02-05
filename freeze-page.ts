@@ -62,25 +62,28 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     }
 
     const cachedHeadDoc = new DOMParser().parseFromString(cache.headHtml, "text/html");
-    const persistedCssHrefs = new Set<string>();
+    const cachedHeads = cachedHeadDoc.head;
+    const persistedHrefs = new Set<string>();
 
-    for (const headElt of Array.from(cachedHeadDoc.head.children)) {
-      const href = getCssHref(headElt);
+    for (const cachedHead of Array.from(cachedHeads.children)) {
+      const href = getCssHref(cachedHead);
       if (href !== null) {
-        persistedCssHrefs.add(href);
-        headElt.remove();
+        persistedHrefs.add(href);
+        cachedHead.remove();
       }
     }
 
-    for (const headElt of Array.from(document.head.children)) {
-      const href = getCssHref(headElt);
-      if (href === null || !persistedCssHrefs.has(href)) {
-        headElt.remove();
+    // Replacing stylesheet link with the same href may cause a flash of unstyled content,
+    // so keep the old one instead of replacing it.
+    for (const currentHead of Array.from(document.head.children)) {
+      const href = getCssHref(currentHead);
+      if (href === null || !persistedHrefs.has(href)) {
+        currentHead.remove();
       }
     }
 
-    for (const headElt of Array.from(cachedHeadDoc.head.children)) {
-      document.head.appendChild(headElt);
+    for (const cachedHead of Array.from(cachedHeads.children)) {
+      document.head.appendChild(cachedHead);
     }
 
     window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
