@@ -62,15 +62,12 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     }
 
     const cachedHeads = new DOMParser().parseFromString(cache.headHtml, "text/html").head.children;
-
     const cachedHrefElts = Array.from(cachedHeads).map((el) => [getCssHref(el), el] as const);
     const cachedHrefs = cachedHrefElts.map(([href]) => href);
-
     const currentHrefElts = Array.from(document.head.children).map((el) => [getCssHref(el), el] as const);
-    const currentHrefs = currentHrefElts.map(([href]) => href);
-
-    const hrefIntersection = cachedHrefs
-      .filter((href) => currentHrefs.includes(href))
+    const hrefIntersection = currentHrefElts
+      .map(([href]) => href)
+      .filter((href) => cachedHrefs.includes(href))
       .filter((href) => href !== undefined);
 
     // Replacing stylesheet link with the same href may cause a white flash,
