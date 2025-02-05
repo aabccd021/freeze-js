@@ -65,20 +65,20 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     const cachedHrefElts = Array.from(cachedHeads).map((el) => [getCssHref(el), el] as const);
     const cachedHrefs = cachedHrefElts.map(([href]) => href);
     const currentHrefElts = Array.from(document.head.children).map((el) => [getCssHref(el), el] as const);
-    const hrefIntersection = currentHrefElts
+    const intersectingHrefs = currentHrefElts
       .map(([href]) => href)
       .filter((href) => cachedHrefs.includes(href))
       .filter((href) => href !== undefined);
 
     // Replacing stylesheet link with the same href may cause a white flash,
     // so keep the old one instead of replacing it.
-    for (const [href, elt] of Array.from(currentHrefElts)) {
-      if (href === undefined || !hrefIntersection.includes(href)) {
+    for (const [href, elt] of currentHrefElts) {
+      if (href === undefined || !intersectingHrefs.includes(href)) {
         elt.remove();
       }
     }
     for (const [href, elt] of cachedHrefElts) {
-      if (href === undefined || !hrefIntersection.includes(href)) {
+      if (href === undefined || !intersectingHrefs.includes(href)) {
         document.head.appendChild(elt);
       }
     }
