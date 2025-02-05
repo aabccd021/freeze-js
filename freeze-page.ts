@@ -43,9 +43,9 @@ function invokeHooks(hooks: Hooks[], name: string): void {
 
 type Hooks = [string, (...args: unknown[]) => unknown];
 
-function getCssHref(el: Element): string | null {
+function getCssHref(el: Element): string | undefined {
   if (!(el instanceof HTMLLinkElement) || el.rel !== "stylesheet") {
-    return null;
+    return undefined;
   }
   return el.href;
 }
@@ -62,27 +62,28 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     }
 
     const cachedHeads = new DOMParser().parseFromString(cache.headHtml, "text/html").head.children;
-    const persistedHrefs = new Set<string>();
 
-    for (const cachedHead of Array.from(cachedHeads)) {
-      const href = getCssHref(cachedHead);
-      if (href !== null) {
-        persistedHrefs.add(href);
-        cachedHead.remove();
-      }
-    }
+    const cachedHrefElts = Array.from(cachedHeads).map((el) => [getCssHref(el), el] as const);
+    const cachedHrefs = cachedHrefElts.map(([href]) => href);
+
+    const currentHrefElts = Array.from(document.head.children).map((el) => [getCssHref(el), el] as const);
+    const currentHrefs = currentHrefElts.map(([href]) => href);
+
+    const hrefIntersection = cachedHrefs
+      .filter((href) => currentHrefs.includes(href))
+      .filter((href) => href !== undefined);
 
     // Replacing stylesheet link with the same href may cause a white flash,
     // so keep the old one instead of replacing it.
-    for (const currentHead of Array.from(document.head.children)) {
-      const href = getCssHref(currentHead);
-      if (href === null || !persistedHrefs.has(href)) {
-        currentHead.remove();
+    for (const [href, elt] of Array.from(currentHrefElts)) {
+      if (href === undefined || !hrefIntersection.includes(href)) {
+        elt.remove();
       }
     }
-
-    for (const cachedHead of Array.from(cachedHeads)) {
-      document.head.appendChild(cachedHead);
+    for (const [href, elt] of cachedHrefElts) {
+      if (href === undefined || !hrefIntersection.includes(href)) {
+        document.head.appendChild(elt);
+      }
     }
 
     window.setTimeout(() => window.scrollTo(0, cache.scroll), 0);
