@@ -114,9 +114,15 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     return;
   }
 
-  window.addEventListener("pagehide", () => freezePage(url, abortController, hooks), {
-    signal: abortController.signal,
-  });
+  window.addEventListener(
+    "pagehide",
+    () => {
+      freezePage(url, abortController, hooks);
+    },
+    {
+      signal: abortController.signal,
+    },
+  );
 
   window.addEventListener(
     "popstate",
@@ -174,6 +180,8 @@ function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks
   }
 }
 
+let first = false;
+
 function onPageShow(event?: PageTransitionEvent): void {
   const url = currentUrl();
 
@@ -186,6 +194,11 @@ function onPageShow(event?: PageTransitionEvent): void {
     (!event?.persisted && perfNavigation.type === "back_forward") ||
     (event?.persisted && perfNavigation.type === "navigate");
 
+  if (event?.persisted === false && perfNavigation.type === "navigate" && !first) {
+    first = true;
+    return;
+  }
+
   if (!shouldRestoreFromCache) {
     restorePage(url);
     return;
@@ -196,6 +209,6 @@ function onPageShow(event?: PageTransitionEvent): void {
 }
 
 export function load(): void {
-  window.addEventListener("pageshow", onPageShow);
   onPageShow();
+  window.addEventListener("pageshow", onPageShow);
 }
