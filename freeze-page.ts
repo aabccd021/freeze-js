@@ -61,10 +61,10 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       document.body.setAttribute(name, value);
     }
 
-    const cachedHeadDoc = new DOMParser().parseFromString(cache.headHtml, "text/html");
+    const cachedHeads = new DOMParser().parseFromString(cache.headHtml, "text/html").head.children;
     const persistedHrefs = new Set<string>();
 
-    for (const cachedHead of Array.from(cachedHeadDoc.head.children)) {
+    for (const cachedHead of Array.from(cachedHeads)) {
       const href = getCssHref(cachedHead);
       if (href !== null) {
         persistedHrefs.add(href);
@@ -72,7 +72,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       }
     }
 
-    // Replacing stylesheet link with the same href may cause a flash of unstyled content,
+    // Replacing stylesheet link with the same href may cause a white flash,
     // so keep the old one instead of replacing it.
     for (const currentHead of Array.from(document.head.children)) {
       const href = getCssHref(currentHead);
@@ -81,7 +81,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       }
     }
 
-    for (const cachedHead of Array.from(cachedHeadDoc.head.children)) {
+    for (const cachedHead of Array.from(cachedHeads)) {
       document.head.appendChild(cachedHead);
     }
 
