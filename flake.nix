@@ -51,8 +51,8 @@
       '';
 
       exportHookJs = pkgs.fetchurl {
-        url = "https://unpkg.com/export-hook-js";
-        hash = "sha256-1+gDF8hDqxbR/ZodBi28qnHP0YLBpXl6vOdU+N/yA5I=";
+        url = "https://unpkg.com/export-hook-js@latest/dist/export-hook.esnext.js";
+        hash = "sha256-TvWKQ14VjHh7ca/zGvcTvfpanH8x7hQINKPb4hu9sOs=";
       };
 
       serve = pkgs.writeShellApplication {
