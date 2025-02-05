@@ -43,6 +43,13 @@ function invokeHooks(hooks: Hooks[], name: string): void {
 
 type Hooks = [string, (...args: unknown[]) => unknown];
 
+function getCssHref(el: Element): string | null {
+  if (!(el instanceof HTMLLinkElement) || el.rel !== "stylesheet") {
+    return null;
+  }
+  return el.href;
+}
+
 async function restorePage(url: RelPath, cache?: Page): Promise<void> {
   if (cache !== undefined) {
     document.body.innerHTML = cache.bodyHtml;
@@ -54,35 +61,25 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       document.body.setAttribute(name, value);
     }
 
-    // document.head.innerHTML = cache.headHtml;
-
-    const parser = new DOMParser();
-    const headDoc = parser.parseFromString(cache.headHtml, "text/html");
-
+    const cachedHeadDoc = new DOMParser().parseFromString(cache.headHtml, "text/html");
     const persistedCssHrefs = new Set<string>();
-    for (const headElt of Array.from(headDoc.body.children)) {
-      if (headElt.tagName !== "LINK" || headElt.getAttribute("rel") !== "stylesheet") {
-        continue;
-      }
-      const href = headElt.getAttribute("href");
-      if (href !== null && href !== "") {
+
+    for (const headElt of Array.from(cachedHeadDoc.body.children)) {
+      const href = getCssHref(headElt);
+      if (href !== null) {
         persistedCssHrefs.add(href);
         headElt.remove();
       }
     }
 
     for (const headElt of Array.from(document.head.children)) {
-      if (
-        headElt.tagName === "LINK" &&
-        headElt.getAttribute("rel") === "stylesheet" &&
-        persistedCssHrefs.has(headElt.getAttribute("href") ?? "")
-      ) {
-        continue;
+      const href = getCssHref(headElt);
+      if (href === null || !persistedCssHrefs.has(href)) {
+        headElt.remove();
       }
-      headElt.remove();
     }
 
-    for (const headElt of Array.from(headDoc.head.children)) {
+    for (const headElt of Array.from(cachedHeadDoc.head.children)) {
       document.head.appendChild(headElt);
     }
 
