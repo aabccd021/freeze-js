@@ -62,10 +62,9 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     }
 
     const cachedHeadDoc = new DOMParser().parseFromString(cache.headHtml, "text/html");
-    const cachedHeads = cachedHeadDoc.head;
     const persistedHrefs = new Set<string>();
 
-    for (const cachedHead of Array.from(cachedHeads.children)) {
+    for (const cachedHead of Array.from(cachedHeadDoc.head.children)) {
       const href = getCssHref(cachedHead);
       if (href !== null) {
         persistedHrefs.add(href);
@@ -82,7 +81,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
       }
     }
 
-    for (const cachedHead of Array.from(cachedHeads.children)) {
+    for (const cachedHead of Array.from(cachedHeadDoc.head.children)) {
       document.head.appendChild(cachedHead);
     }
 
