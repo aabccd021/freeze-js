@@ -1,6 +1,6 @@
-const mainElt = document.querySelector("[data-testid=main]");
-if (mainElt !== null) {
-  mainElt.addEventListener("click", () => {
+export function load() {
+  const mainElt = document.querySelector("[data-testid=main]");
+  mainElt?.addEventListener("click", () => {
     console.warn("click static");
   });
 }

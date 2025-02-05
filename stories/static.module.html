@@ -2,13 +2,14 @@
 <html>
   <head>
     <title>Static</title>
+    <link rel="stylesheet" href="/style.css" />
     <script
       src="/freeze-page.js"
       type="module"
       data-invoke-hook="load"
     ></script>
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/static.mjs" type="module"></script>
+    <script src="/static.mjs" type="module" data-invoke-hook="load"></script>
+    <!-- <script src="/export-hook.js" type="module"></script> -->
     <script src="/invoke-hook.js" type="module"></script>
   </head>
   <body>
