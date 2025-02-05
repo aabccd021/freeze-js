@@ -180,21 +180,21 @@ function freezePage(url: RelPath, abortController: AbortController, hooks: Hooks
   }
 }
 
-let first = false;
+let loaded = false;
 
 function onPageShow(event?: PageTransitionEvent): void {
+  // Avoid race condition on first page load.
+  // The race condition is kind of reproducible when the tests are run on 6 workers in parallel.
+  if (event?.persisted === false && !loaded) {
+    loaded = true;
+    return;
+  }
+
   const url = currentUrl();
 
   const perfNavigation = performance.getEntriesByType("navigation")[0];
   if (perfNavigation === undefined || !("type" in perfNavigation) || typeof perfNavigation.type !== "string") {
     throw new Error(`Unknown performance entry: ${JSON.stringify(perfNavigation)}`);
-  }
-
-  // I don't know why but this is necessary to prevent race conditions.
-  // The race condition is kind of reproducible when the tests are run on 6 workers in parallel.
-  if (event?.persisted === false && perfNavigation.type === "navigate" && !first) {
-    first = true;
-    return;
   }
 
   const restoreFromCache =
