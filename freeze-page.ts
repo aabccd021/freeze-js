@@ -64,7 +64,7 @@ async function restorePage(url: RelPath, cache?: Page): Promise<void> {
     const cachedHeadDoc = new DOMParser().parseFromString(cache.headHtml, "text/html");
     const persistedCssHrefs = new Set<string>();
 
-    for (const headElt of Array.from(cachedHeadDoc.body.children)) {
+    for (const headElt of Array.from(cachedHeadDoc.head.children)) {
       const href = getCssHref(headElt);
       if (href !== null) {
         persistedCssHrefs.add(href);

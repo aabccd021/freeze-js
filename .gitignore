@@ -6,3 +6,4 @@ dist
 test-results
 stories/freeze.js
 stories/export-hook.js
+stories/invoke-hook.js
